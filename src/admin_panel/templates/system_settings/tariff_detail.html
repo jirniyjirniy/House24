@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block head %}{% endblock %}
+{% block content %}
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header text-right">
+                <a class="btn btn-primary" href="{% url 'tariffs_update' tariff.id %}">Редактировать тариф</a>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <table class="table table-bordered table-striped table-view mb-5">
+                    <tbody>
+                        <tr>
+                            <td class="font-weight-bold">Название тарифа</td>
+                            <td>{{ tariff.title }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Описание</td>
+                            <td>{{ tariff.description }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Дата редактирования</td>
+                            <td>{{ tariff.date_edited }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="table-responsive no-padding margin-top-15">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Услуга</th>
+                                <th>Ед. изм.</th>
+                                <th>Цена за ед., грн</th>
+                                <th>Валюта</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tariffservice in tariffservices %}
+                                <tr role="row">
+                                    <td>{{ tariffservice.id }}</td>
+                                    <td>{{ tariffservice.service.title }}</td>
+                                    <td>{{ tariffservice.service.measure.title }}</td>
+                                    <td>{{ tariffservice.price }}</td>
+                                    <td>грн</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3"></div>
+        </div>
+    </section>
+{% endblock %}

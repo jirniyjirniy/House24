@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Новый пользователь{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header p-0 border-bottom-0"></div>
+            <div class="card-body p-2">
+                <form action="{% url 'personal_add' %}" id="personal-form" method="post">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 col-12 pe-3">
+                            {% bootstrap_field form.first_name %}
+                            {% bootstrap_field form.last_name %}
+                            {% bootstrap_field form.phone %}
+                            {% bootstrap_field form.status %}
+                            {% bootstrap_field form.role %}
+                        </div>
+                        <div class="col-md-6 col-12 pe-3">
+                            {% bootstrap_field form.email %}
+                            <div class="d-flex flex-wrap align-items-center mb-3">
+                                <div class="flex-grow-1">{% bootstrap_field form.password1 %}</div>
+                                <div style="margin-top: 16px">
+                                    <button class="btn btn-default rounded-0" id="generatePassword" type="button">Сгенерировать</button>
+                                </div>
+                                <div style="margin-top: 16px">
+                                    <button class="btn btn-primary rounded-0"
+                                            id="showPassword"
+                                            type="button"
+                                            style="height: 38px">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% bootstrap_field form.password2 %}
+                        </div>
+                    </div>
+                    <div class="col-12 text-right">
+                        {% bootstrap_button 'Отменить' button_type='reset' button_class='btn-default' %}
+                        {% bootstrap_button 'Сохранить' button_type='submit' button_class='btn-success' %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script type="module"
+            src="{% static 'admin_panel/system_settings/personal/personal.js' %}"></script>
+    <script>
+        $.validator.addMethod('phoneUA', function (phone_number, element) {
+            return this.optional(element) || phone_number.length === 19 && phone_number.match(/^\+38 \(\d{3}\) \d{3}-?\d{2}-?\d{2}$/);
+        }, 'Пример телефона: +38 (093) 123-12-34');
+        $('#personal-form').validate({
+            errorClass: 'error fail-alert',
+            validClass: 'valid success-alert',
+            ignore: '.ignore',
+            rules: {
+                password1: {
+                    required: true,
+                    minlength: 8,
+                },
+                password2: {
+                    required: true,
+                    minlength: 8,
+                    equalTo: '#id_password1'
+                },
+                email: {
+                    required: true,
+                    email: true,
+                },
+                first_name: {
+                    required: true,
+                },
+                last_name: {
+                    required: true,
+                },
+                phone: {
+                    required: true,
+                    phoneUA: true
+                },
+            },
+            messages: {
+                password1: {
+                    required: "Обязательно укажите пароль",
+                    minlength: 'Пароль не менее 8 символов',
+                },
+                password2: {
+                    required: "Обязательно повторите пароль",
+                    minlength: 'Пароль не менее 8 символов',
+                    equalTo: "Пароли не совпадают"
+                },
+                email: {
+                    required: "Обязательно укажите email",
+                    email: "Проверьте правильность email",
+                },
+                first_name: {
+                    required: "Обязательно укажите Имя",
+                },
+                last_name: {
+                    required: "Обязательно укажите Фамилию",
+                },
+                phone: {
+                    required: "Обязательно укажите Номер Телефона",
+                },
+
+            }
+        });
+        $('#personal_form').on('change', function (e) {
+            $(this).valid()
+        })
+    </script>
+{% endblock %}

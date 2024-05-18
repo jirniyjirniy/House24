@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Тариф: {{ tariff_form.instance.title }}{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header p-0 border-bottom-0"></div>
+            <div class="card-body p-2">
+                <form method="post"
+                      action="{% url 'tariffs_update' tariff_form.instance.pk %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-lg-7 col-12">{% bootstrap_form tariff_form layout='vertical' %}</div>
+                        <div class="col-lg-7 col-12">
+                            {{ tariff_service_formset.management_form }}
+                            {{ service_formset.management_form }}
+                            {% for tariff_service_form in tariff_service_formset %}
+                                <div class="formset__item">
+                                    <div class="row mb-2">
+                                        <div class="col-12 col-md-4 pe-0">
+                                            <div class="mb-3">{% bootstrap_field tariff_service_form.service %}</div>
+                                        </div>
+                                        <div class="col-12 col-md-3 pe-0">
+                                            <div class="mb-3">{% bootstrap_field tariff_service_form.price %}</div>
+                                        </div>
+                                        <div class="col-12 col-md-2 pe-0">
+                                            <div class="mb-3">{% bootstrap_field tariff_service_form.currency %}</div>
+                                        </div>
+                                        <div class="col-12 col-md-2 pe-0">
+                                            <div class="mb-3">
+                                                <label class="form-label" for="measure">Ед. изм.</label>
+                                                <select disabled name="measure" class="form-select rounded-0 shadow-none">
+                                                    <option id="measure" selected>{{ tariff_service_form.instance.service.measure.title }}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-1 ps-0">
+                                            <button type="button"
+                                                    class="btn btn-default rounded-0 service__delete"
+                                                    style="margin-top: 32px;
+                                                           height: 38px">
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <input type="hidden"
+                                           name="tariff_service-{{ forloop.counter0 }}-id"
+                                           value="{{ tariff_service_form.id.value }}"
+                                           id="id_tariff_service-{{ forloop.counter0 }}-id">
+                                    <div class="mb-3 d-none">
+                                        <div class="form-check">
+                                            <input type="checkbox"
+                                                   name="tariff_service-{{ forloop.counter0 }}-DELETE"
+                                                   class="form-check-input"
+                                                   id="id_tariff_service-{{ forloop.counter0 }}-DELETE">
+                                            <label class="form-check-label"
+                                                   for="id_tariff_service-{{ forloop.counter0 }}-DELETE">
+                                                Удалить
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <div class="service__select d-none">
+                                {% for service_form in service_formset %}
+                                    <option value={{ service_form.id.value }}>{{ service_form.title.value }}
+                                    </option>
+                                {% endfor %}
+                            </div>
+                            <button type="button" class="btn btn-default add__tariff-service">Добавить услугу</button>
+                        </div>
+                    </div>
+                    <div class="col-sm-6 col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block script %}
+    <script type="module"
+            src="{% static 'admin_panel/system_settings/tariffs/tariff_logic.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,18 @@
+.daterange {
+  border-radius: 0px;
+  border: 1px #dee2e6 solid;
+  height: 38px;
+  cursor: pointer;
+}
+
+input:focus {
+  color: green;
+}
+
+.select2-results__option {
+  white-space: nowrap;
+}
+
+.select2.select2-container {
+  width: 100% !important;
+}

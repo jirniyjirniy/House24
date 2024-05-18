@@ -1,0 +1,132 @@
+{% extends 'third_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2b %}Счётчики{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet"
+          href="{% static 'plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet"
+          href="{% static 'admin_panel/application/application.css' %}">
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock %}
+{% block name %}Счетчики{% endblock %}
+{% block navigation %}<li class="breadcrumb-item active">Счетчики</li>{% endblock %}
+{% block action_list %}
+    <a class="btn btn-success" href="{% url 'add_indicator' %}">Добавить показание</a>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'indicators_filtered' %}" method="get" id="filter">
+        <table id="indicators"
+               class="table border-0 table-bordered table-hover linkedRaw w-100">
+            <thead>
+                <tr>
+                    <th>Дом</th>
+                    <th>Секция</th>
+                    <th>№ квартиры</th>
+                    <th>Счетчик</th>
+                    <th>Текущие показания</th>
+                    <th>Ед.изм</th>
+                    <th></th>
+                </tr>
+                <tr class="border-0">
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.house wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.section wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.flat wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.service wrapper_class='' %}</td>
+                    <td style="min-width: 170px"></td>
+                    <td style="min-width: 100px"></td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for indicator in indications %}
+                    <tr class="border-0">
+                        <td>{{ indicator.flat.house }}</td>
+                        <td>
+                            {% if indicator.flat.section is None %}
+                                (не указано)
+                            {% else %}
+                                {{ indicator.flat.section }}
+                            {% endif %}
+                        </td>
+                        <td>{{ indicator.flat.number }}</td>
+                        <td>{{ indicator.service.title }}</td>
+                        <td style="background: #F0FBF0">{{ indicator.indication_val }}</td>
+                        <td style="background: #F0FBF0">{{ indicator.service.measure }}</td>
+                        <td class="ps-1 pe-1 text-center">
+                            <div class="btn-group">
+                                <a href="{% url 'add_new_indicator' indicator.flat.id indicator.service.id %}"
+                                   class="btn btn-default"
+                                   title="Снять новое показания счетчика"
+                                   target="_blank"
+                                   role="button">
+                                    <i class="fa-solid fa-gauge"></i>
+                                </a>
+                                <a class="btn btn-default"
+                                   title="Открыть историю показаний для счетчика"
+                                   href="{% url 'counter_indicators' indicator.flat.id indicator.service.id %}"
+                                   role="button"><i class="fa-solid fa-eye"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">{% bootstrap_pagination page_obj size='sm' %}</div>
+{% endblock %}
+{% block script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function (){
+            $('#indication').DataTable({
+                searching: false,
+                paging: false,
+                select: true,
+                'bInfo': false,
+                orderCellsTop: true,
+                'order': [],
+                'columnDefs': [
+                    {
+                        'targets': 4,
+                        'orderable': false,
+                    },
+                    {
+                        'targets': 5,
+                        'orderabel': false,
+                    },
+                    {
+                        'targets': 6,
+                        'orderable': false,
+                    }
+                ]
+            })
+        });
+        if($('.form-house-select').val() === ''){
+            $('.select2-simple-section').select2({
+                placeholder: 'Выберите дом',
+                minimumResultsForSearch: -1,
+            })
+        }else{
+            $('.select2-simple-section').select2({
+                placeholder: '',
+                minimumResultsForSearch: -1
+            })
+        }
+    </script>
+    <script type="module"
+            src="{% static 'admin_panel/indication/counters_list.js' %}"></script>
+{% endblock %}

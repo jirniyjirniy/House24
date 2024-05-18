@@ -1,0 +1,253 @@
+{% extends 'third_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{% load check_relation %}
+{# Read the documentation for more information#}
+{% block title_2b %}Владельцы квартир{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet"
+          href="{% static 'plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+{% block name %}Владельцы квартир{% endblock %}
+{% block navigation %}<li class="breadcrumb-item active">Владельцы квартир</li>{% endblock %}
+{% block action_list %}
+    <button class="btn btn-success dropdown-toggle"
+            type="button"
+            data-bs-toggle="dropdown"
+            aria-expanded="false">Выберите действие</button>
+    <ul class="dropdown-menu">
+        <li>
+            <a class="dropdown-item" href="{% url 'clients_add' %}">Добавить владельца квартиры</a>
+        </li>
+        {% if user_permission.mailbox %}
+            <li>
+                <a class="dropdown-item" href="">Отправить сообщение должникам</a>
+            </li>
+        {% endif %}
+        <li>
+            <a class="dropdown-item" href="">Отправить приглашение</a>
+        </li>
+    </ul>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'clients_filtered' %}" method="get" id="filter">
+        <table id="client"
+               class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Телефон</th>
+                    <th>Email</th>
+                    <th>Дом</th>
+                    <th>Квартира</th>
+                    <th>Добавлен</th>
+                    <th>Статус</th>
+                    <th>Есть долг</th>
+                    <th></th>
+                </tr>
+                <tr class="border-0">
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.ID wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.full_name wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.phone wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.email wrapper_class='' %}</td>
+                    <td style="min-width: 200px">{% bootstrap_field filter_form.house wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.flat wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.date_added wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.status wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.have_debts wrapper_class='' %}</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody class="clients">
+                {% for client in clients %}
+                    <tr class="border-0 row_elem">
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">{{ client.ID }}</td>
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">
+                            {{ client.user.last_name }}&nbsp;{{ client.user.first_name }}&nbsp;{{ client.patronymic }}
+                        </td>
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">{{ client.user.phone }}</td>
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">{{ client.user.email }}</td>
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">
+                            {% for flat in client.id|get_house_queryset %}
+                                <a {% if user_permission.house %} href="{% url 'house_detail' flat.house.id %}" {% else %} href="#" {% endif %}>{{ flat.house }}</a>,
+                                <br>
+                            {% endfor %}
+                        </td>
+                        <td style="cursor: pointer"
+                            data-href="{% url 'clients_detail' client.id %}">
+                            {% for flat in client.id|get_flat_queryset %}
+                                <a {% if user_permission.flat %} href="{% url 'flats_detail' flat.id %}" {% else %} href="#" {% endif %}>№{{ flat.number }}
+                                    - {{ flat.house }}</a>,
+                                    <br>
+                                {% endfor %}
+                            </td>
+                            <td style="cursor: pointer"
+                                data-href="{% url 'clients_detail' client.id %}">{{ client.user.date_joined }}</td>
+                            <td style="cursor: pointer"
+                                data-href="{% url 'clients_detail' client.id %}">
+                                {% if client.user.get_status_display == 'Активен' %}
+                                    <span class="badge text-bg-success text-white">Активен</span>
+                                {% elif client.user.get_status_display == 'Новый' %}
+                                    <span class="badge text-bg-warning text-white">Новый</span>
+                                {% else %}
+                                    <span class="badge text-bg-danger text-white">Отключён</span>
+                                {% endif %}
+                            </td>
+                            <td style="cursor: pointer"
+                                data-href="{% url 'clients_detail' client.id %}">ДА</td>
+                            <td class="ps-1 pe-1">
+                                <div class="btn-group">
+                                    <a class="btn btn-default" href="#" role="button"><i class="fa-solid fa-envelope"></i></a>
+                                    <a class="btn btn-default"
+                                       href="{% url 'clients_update' client.user.id %}"
+                                       role="button"><i class="fa-solid fa-pencil"></i></a>
+                                    <button class="btn btn-default delete-confirmation"
+                                            data-target="{{ client.user.id }}"
+                                            role="button">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </form>
+    {% endblock %}
+    {% block card_footer %}
+        <div class="d-inline-flex justify-content-end">{% bootstrap_pagination page_obj size='sm' %}</div>
+        <hr style="border-top: 1px solid darkgrey;">
+        <div>
+            <div class="d-flex flex-row flex-wrap">
+                <span>Количество владельцев:&nbsp;</span> <span class="text-bold">{{ clients.count }}</span>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script src="https://cdn.datatables.net/fixedheader/3.2.3/js/dataTables.fixedHeader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#client').DataTable({
+                searching: false,
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+                    {
+                        "targets": 7, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 8, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 9, // First column
+                        "orderable": false
+                    },
+                ]
+            });
+        });
+
+        $(function () {
+            $('input[name="date_added"]').daterangepicker({
+                opens: 'center',
+                autoUpdateInput: false,
+                applyButtonClasses: "btn-success",
+                singleDatePicker: true,
+
+                "locale": {
+                    "format": "DD/MM/YYYY",
+                    "separator": " - ",
+                    "applyLabel": "Применить",
+                    "cancelLabel": "Отменить",
+                    "fromLabel": "С",
+                    "toLabel": "По",
+                    "customRangeLabel": "Custom",
+                    "weekLabel": "Нд",
+                    "daysOfWeek": [
+                        "Вс",
+                        "Пн",
+                        "Вт",
+                        "Ср",
+                        "Чт",
+                        "Пт",
+                        "Сб"
+                    ],
+                    "monthNames": [
+                        "Январь",
+                        "Февраль",
+                        "Март",
+                        "Апрель",
+                        "Май",
+                        "Июнь",
+                        "Июль",
+                        "Август",
+                        "Сентябрь",
+                        "Октябрь",
+                        "Ноябрь",
+                        "Декабрь"
+                    ],
+                    "firstDay": 1
+                },
+            },);
+            $('.singledatepicker').on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY'));
+            });
+            $('.singledatepicker').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
+        });
+
+
+        $(".delete-confirmation").on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                let tr_elem = $(this).parents('.row_elem')
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/clients/delete/${$(this).data('target')}`,         /* Куда отправить запрос */
+                    method: 'post',             /* Метод запроса (post или get) */
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                        tr_elem.remove()
+                        $('#filter').trigger('change')
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+    <script type="module" src="{% static 'clients/client.js' %}"></script>
+{% endblock %}

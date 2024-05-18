@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% load thumbnail %}
+{% block title %}Главная{% endblock %}
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css"
+          rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Редактирование страницы</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">Редактирование страницы</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header ps-0 border-bottom-0 text-gray-dark">
+                <h5 class="p-0 fs-5">Редактирование страницы "Главная"</h5>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div>
+            <div class="card-body ps-0">
+                <form method="post"
+                      action="{% url 'main_page_update' %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h4 class="p-0 fs-5">Слайдер</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {{ photo_formset.management_form }}
+                    <div class="row mb-3">
+                        {% for photo_form in photo_formset %}
+                            <div class="col-12 col-md-4 p-2">
+                                <h5>Слайд {{ forloop.counter }}</h5>
+                                <img src=" {% if photo_form.instance.img %}{% thumbnail photo_form.instance.img 'main' %} {% else %}https://via.placeholder.com/600.png?text=No+Image{% endif %}"
+                                     style="object-fit: cover;
+                                            height: 300px"
+                                     class="img-fluid w-100"
+                                     alt="">
+                                <div class="mb-3">
+                                    <label class="control-label mt-2" for="id_photo-{{ forloop.counter0 }}-img">
+                                        Рекомендуемый
+                                        размер: (1920x800)
+                                    </label>
+                                    <input type="file"
+                                           name="photo-{{ forloop.counter0 }}-img"
+                                           class=""
+                                           accept="image/*"
+                                           id="id_photo-{{ forloop.counter0 }}-img">
+                                </div>
+                                <input type="hidden"
+                                       name="photo-{{ forloop.counter0 }}-id"
+                                       value="{{ photo_form.id.value }}"
+                                       id="id_photo-{{ forloop.counter0 }}-id">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <h4 class="p-0 fs-5">Краткая информация</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {% bootstrap_form main_form %}
+                    <h4 class="p-0 fs-5 pt-3">Рядом с нами</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {{ info_photo_formset.management_form }}
+                    <div class="row mb-3">
+                        {% for info_photo_form in info_photo_formset %}
+                            <div class="col-12 col-md-4 p-2">
+                                <h5>Блок {{ forloop.counter }}</h5>
+                                <img src="{% if info_photo_form.instance.img %}{% thumbnail info_photo_form.instance.img 'main' %} {% else %}https://via.placeholder.com/600.png?text=No+Image{% endif %}"
+                                     style="width: 100%;
+                                            height: 200px;
+                                            object-fit: cover"
+                                     alt=""
+                                     class="w-100 img-fluid">
+                                <div class="mb-3">
+                                    <label class="control-label mt-2"
+                                           for="id_info_photo-{{ forloop.counter0 }}-img">
+                                        Рекомендуемый размер:
+                                        (1000x600)
+                                    </label>
+                                    <input type="file"
+                                           name="info_photo-{{ forloop.counter0 }}-img"
+                                           class=""
+                                           accept="image/*"
+                                           id="id_info_photo-{{ forloop.counter0 }}-img">
+                                </div>
+                                {% bootstrap_field info_photo_form.title %}
+                                {% bootstrap_field info_photo_form.description %}
+                                <input type="hidden"
+                                       name="info_photo-{{ forloop.counter0 }}-id"
+                                       value="{{ info_photo_form.id.value }}"
+                                       id="id_info_photo-{{ forloop.counter0 }}-id">
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <h4 class="p-0 fs-5 pt-3">Настройки SEO</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {% bootstrap_form seo_form %}
+                    <div class="text-center">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-ru-RU.min.js"
+            integrity="sha512-uCNUSqDrnthkeMqbxKoePE2CewCjUenOwh3/Fw8shLJ+bBppg6ynadVRVcL5EStFBq2GUKUrAJZgC2qs/Q5z9Q=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script type="module"
+            src="{% static 'admin_panel/manage_site/manage_site.js' %}"></script>
+{% endblock %}

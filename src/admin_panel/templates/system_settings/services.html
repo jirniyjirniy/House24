@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% load check_relation %}
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
+          rel="stylesheet" />
+{% endblock %}
+{% block title %}Услуги{% endblock %}
+{% block content %}
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Редактирование услуг</h4>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-outline-tabs ps-3">
+            <div class="card-header p-0 border-bottom-0">
+                <ul class="nav nav-tabs-custom" id="custom-tabs-four-tab" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active"
+                           id="custom-tabs-four-services-tab"
+                           data-toggle="pill"
+                           href="#custom-tabs-four-services"
+                           role="tab"
+                           aria-controls="custom-tabs-four-services"
+                           aria-selected="true">Услуги</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link"
+                           id="custom-tabs-four-units-tab"
+                           data-toggle="pill"
+                           href="#custom-tabs-four-units"
+                           role="tab"
+                           aria-controls="custom-tabs-four-units"
+                           aria-selected="false">Единицы измерения</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <form action="{% url 'services' %}"
+                      method="post"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-xs-12 col-lg-7">
+                            <div class="tab-content" id="custom-tabs-four-tabContent">
+                                <div class="tab-pane fade active show"
+                                     id="custom-tabs-four-services"
+                                     role="tabpanel"
+                                     aria-labelledby="custom-tabs-four-services-tab">
+                                    {{ service_formset.management_form }}
+                                    {% for service_form in service_formset %}
+                                        <div class="formset__item">
+                                            <div class="row mb-2">
+                                                <div class="col-12 col-sm-7">{% bootstrap_field service_form.title %}</div>
+                                                <div class="col-9 col-sm-4 pe-0">{% bootstrap_field service_form.measure size=large %}</div>
+                                                <div class="col-3 col-sm-1 ps-0">
+                                                    <button type="button"
+                                                            {% if  service_form.id.value|disablingService %} style="margin-top: 32px;height: 38px;opacity: 0.5;cursor: not-allowed" class="btn btn-default rounded-0 service__delete dsbld-service"  {% endif %}
+                                                            class="btn btn-default rounded-0 service__delete"
+                                                            style="margin-top: 32px;
+                                                                   height: 38px">
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">{% bootstrap_field service_form.show_in_indication %}</div>
+                                            <input type="hidden"
+                                                   name="service_formset-{{ forloop.counter0 }}-id"
+                                                   value="{{ service_form.id.value }}"
+                                                   id="id_service_formset-{{ forloop.counter0 }}-id">
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input type="checkbox"
+                                                           name="service_formset-{{ forloop.counter0 }}-DELETE"
+                                                           class="form-check-input"
+                                                           id="id_service_formset-{{ forloop.counter0 }}-DELETE"
+                                                           style="display: none">
+                                                    <label class="form-check-label"
+                                                           for="id_service_formset-{{ forloop.counter0 }}-DELETE"
+                                                           style="display: none">Удалить</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    {{ measure_formset.management_form }}
+                                    <select class="measure__select d-none">
+                                        {% for measure_form in measure_formset %}
+                                            <option value={{ measure_form.id.value }}>{{ measure_form.title.value }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="button" class="btn btn-default add__service mb-lg-3">Добавить</button>
+                                </div>
+                                <div class="tab-pane fade "
+                                     id="custom-tabs-four-units"
+                                     role="tabpanel"
+                                     aria-labelledby="custom-tabs-four-units-tab">
+                                    {% for measure_form in measure_formset %}
+                                        <div class="formset__item">
+                                            <div class="mb-3 row">
+                                                <div class="col-9 col-sm-11 pe-0">{% bootstrap_field measure_form.title %}</div>
+                                                <div class="col-3 col-sm-1 pe-0 ps-0">
+                                                    <button {% if  measure_form.id.value|disablingMeasure %} style="margin-top: 32px;height: 38px;opacity: 0.5;cursor: not-allowed" class="btn btn-default rounded-0 measure__delete dsbld" {% endif %}
+                                                            type="button"
+                                                            class="btn btn-default rounded-0 measure__delete"
+                                                            style="margin-top: 32px;
+                                                                   height: 38px">
+                                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <input type="hidden"
+                                                   name="measure_formset-{{ forloop.counter0 }}-id"
+                                                   value="{{ measure_form.id.value }}"
+                                                   id="id_measure_formset-{{ forloop.counter0 }}-id">
+                                            <div class="mb-3 d-none">
+                                                <div class="form-check">
+                                                    <input type="checkbox"
+                                                           name="measure_formset-{{ forloop.counter0 }}-DELETE"
+                                                           class="form-check-input"
+                                                           id="id_measure_formset-{{ forloop.counter0 }}-DELETE"
+                                                           style="display: none">
+                                                    <label class="form-check-label"
+                                                           for="id_measure_formset-{{ forloop.counter0 }}-DELETE"
+                                                           style="display: none">Delete</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                    <button type="button" class="btn btn-default add__measure mb-lg-3">Добавить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-xs-12 text-center">
+                            <div class="form-group">
+                                <a href="#" class="btn btn-default">Отменить</a>
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+{% block  script %}
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script type="module"
+            src="{% static 'admin_panel/system_settings/services/services.js' %}"></script>
+{% endblock %}

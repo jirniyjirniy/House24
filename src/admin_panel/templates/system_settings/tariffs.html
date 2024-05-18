@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Тарифы{% endblock %}
+{% block content %}
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Тарифы</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item active">Тарифы</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+            <div class="row mb-3">
+                <div class="dropdown text-right">
+                    <a class="btn btn-success" href="{% url 'tariff_create' %}">Добавить тариф</a>
+                </div>
+                <!-- ./col -->
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table id="tariffs"
+                           class="table table-bordered  table-hover table-striped linkedRow border-0 w-100">
+                        <thead>
+                            <tr>
+                                <th>Название тарифа</th>
+                                <th>Описание тарифа</th>
+                                <th>Дата редактирования</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for tariff in tariffs %}
+                                <tr class="border-0">
+                                    <td style="cursor: pointer"
+                                        data-href="{% url 'tariff_detail' tariff.id %}">{{ tariff.title }}</td>
+                                    <td style="cursor: pointer"
+                                        data-href="{% url 'tariff_detail' tariff.id %}">{{ tariff.description }}</td>
+                                    <td style="cursor: pointer"
+                                        data-href="{% url 'tariff_detail' tariff.id %}">{{ tariff.date_edited }}</td>
+                                    <td class="ps-1 pe-1 text-center">
+                                        <div class="btn-group">
+                                            <form action="{% url 'tariff_delete' tariff.id %}" method="post">
+                                                {% csrf_token %}
+                                                <a class="btn btn-default"
+                                                   href="{% url 'tariffs_copy' tariff.id %}"
+                                                   role="button"><i class="fa-solid fa-clone fa-rotate-90"></i></a>
+                                                <a class="btn btn-default"
+                                                   href="{% url 'tariffs_update' tariff.id %}"
+                                                   role="button"><i class="fa-solid fa-pencil"></i></a>
+                                                <button class="btn btn-default delete-confirmation"
+                                                        type="submit"
+                                                        role="button">
+                                                    <i class="fa-solid fa-trash-can"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+        </div>
+    </section>
+{% endblock %}
+{% block script %}
+    <script src="{% static '/plugins/select2/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#tariffs').DataTable({
+                searching: false,
+                ordering: false,
+                paging: false,
+                select: true,
+                "bInfo": false
+            });
+        });
+        $("form").on('submit', function () {
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                return true;
+            }
+            return false;
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+{% endblock %}

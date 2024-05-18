@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Роли{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Роли</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item active">Роли</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ roles_formset.management_form }}
+                    <div class="table-responsive mb-3">
+                        <table class="table table-bordered  table-hover table-striped linkedRow border-0 w-100">
+                            <thead>
+                                <tr>
+                                    <th>Роль</th>
+                                    <th>Статистика</th>
+                                    <th>Касса</th>
+                                    <th>Квитанции на оплату</th>
+                                    <th>Лицевые счета</th>
+                                    <th>Квартиры</th>
+                                    <th>Владельцы квартир</th>
+                                    <th>Дома</th>
+                                    <th>Сообщения</th>
+                                    <th>Заявки вызова мастера</th>
+                                    <th>Счётчики</th>
+                                    <th>Управление сайтом</th>
+                                    <th>Услуги</th>
+                                    <th>Тарифы</th>
+                                    <th>Роли</th>
+                                    <th>Пользователи</th>
+                                    <th>Платёжные реквизиты</th>
+                                    <th>Статьи платежей</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for form in roles_formset %}
+                                    {% bootstrap_field form.id wrapper_class='d-none' %}
+                                    {% if form.instance.name == 'director' %}
+                                        <tr class="director">
+                                        {% else %}
+                                            <tr>
+                                            {% endif %}
+                                            <td>
+                                                {% if form.instance.name == 'director' %}
+                                                    Директор
+                                                {% elif form.instance.name == 'manager' %}
+                                                    Управляющий
+                                                {% elif form.instance.name == 'accountant' %}
+                                                    Бухгалтер
+                                                {% elif form.instance.name == 'plumber' %}
+                                                    Сантехник
+                                                {% elif form.instance.name == 'electrician' %}
+                                                    Электрик
+                                                {% elif form.instance.name == 'locksmith' %}
+                                                    Слесарь
+                                                {% endif %}
+                                            </td>
+                                            <td>{% bootstrap_field form.statistics wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.paybox wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.receipt wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.personal_account wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.flat wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.flat_owner wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.house wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.mailbox wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.application wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.indication wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.manage_site wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.service wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.tariff wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.role wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.users wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.payment_detail wrapper_class='d-flex justify-content-center' %}</td>
+                                            <td>{% bootstrap_field form.payment_article wrapper_class='d-flex justify-content-center' %}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-12 text-right">
+                            {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                            {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    {% endblock %}
+    {% block script %}
+        <script type="text/javascript"
+                src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+        <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+        <script type="application/javascript">
+        $('.director').find('input').each(function () {
+            $(this).on('click', function () {
+                return false
+            })
+        })
+        $(document).ready(function () {
+            $('#roles').DataTable({
+                searching: false,
+                ordering: false,
+                paging: false,
+                select: true,
+                "bInfo": false
+
+
+            });
+        });
+
+        </script>
+    {% endblock %}

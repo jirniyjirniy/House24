@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Профиль владельца{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Профиль владельца</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'clients' %}">Владельцы квартир</a>
+                        </li>
+                        <li class="breadcrumb-item active">Профиль владельца</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header text-right">
+                <a class="btn btn-default mb-3 mb-sm-0"
+                   href="{% url 'clients_update' client.user.id %}"><i class="fa fa-external-link pe-2"></i>Перейти в кабинет</a>
+                <a class="btn btn-primary mb-3 mb-sm-0"
+                   href="{% url 'clients_update' client.user.id %}">Редактировать
+                профиль</a>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <div class="mb-3 text-center text-sm-left">
+                    {% if client.user.avatar == '' %}
+                        <img class="img-circle img-responsive"
+                             style="width: 160px;
+                                    height: 160px;
+                                    object-fit: cover"
+                             src="https://via.placeholder.com/600.png?text=No+Image"
+                             alt="{{ client.user.email }}">
+                    {% else %}
+                        <img class="img-circle img-responsive"
+                             style="width: 160px;
+                                    height: 160px;
+                                    object-fit: cover"
+                             src="{{ client.user.avatar.url }}"
+                             alt="{{ client.user.email }}">
+                    {% endif %}
+                </div>
+                <div class="table-responsive no-padding">
+                    <table class="table table-bordered table-striped table-view">
+                        <tbody>
+                            <tr>
+                                <td class="font-weight-bold">Статус</td>
+                                <td>
+                                    {% if client.user.get_status_display == 'Активен' %}
+                                        <span class="badge text-bg-success text-white">Активен</span>
+                                    {% elif client.user.get_status_display == 'Новый' %}
+                                        <span class="badge text-bg-warning text-white">Новый</span>
+                                    {% else %}
+                                        <span class="badge text-bg-danger text-white">Отключён</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">ID</td>
+                                <td>{{ client.ID }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Фамилия</td>
+                                <td>{{ client.user.last_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Имя</td>
+                                <td>{{ client.user.first_name }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Отчество</td>
+                                <td>{{ client.patronymic }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Дата рождения</td>
+                                <td>{{ client.birthday }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">О владельце (заметки)</td>
+                                <td>{{ client.bio }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Телефон</td>
+                                <td>{{ client.user.phone }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Viber</td>
+                                <td>{{ client.viber }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Telegram</td>
+                                <td>{{ client.telegram }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Email</td>
+                                <td>{{ client.user.email }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <h4>Квартиры</h4>
+                <div class="table-responsive no-padding margin-top-15">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th class="font-weight-bold">#</th>
+                                <th class="font-weight-bold">Дом</th>
+                                <th class="font-weight-bold">Секция</th>
+                                <th class="font-weight-bold">Квартира</th>
+                                <th class="font-weight-bold">Лицевой счет</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for flat in flats %}
+                                <tr role="row">
+                                    <td>{{ flat.id }}</td>
+                                    <td>
+                                        {% if flat.house is None %}
+                                            не указано
+                                        {% else %}
+                                            <a {% if user_permission.house %} href="{% url 'read_house' flat.house.id %}" {% else %} href="#" {% endif %}>{{ flat.house }}</a>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if flat.section is None %}
+                                            не указано
+                                        {% else %}
+                                            {{ flat.section }}
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a {% if user_permission.flat %} href="{% url 'read_flat' flat.id %}" {% else %} href="#" {% endif %}>{{ flat.number }}</a>
+                                    </td>
+                                    <td>
+                                        {% if flat.personal_account is None or flat.personal_account == '' %}
+                                            не указано
+                                        {% else %}
+                                            <a {% if user_permission.personal_account %} href="{% url 'read_personal_account' flat.personal_account.id %}" {% else %} href="#" {% endif %}>{{ flat.personal_account }}</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3"></div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}{% endblock %}

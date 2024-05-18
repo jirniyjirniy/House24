@@ -1,0 +1,214 @@
+{% load static %}
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{# Read the documentation for more information #}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon"
+              type="image/svg"
+              href="{% static 'dist/img/AdminLTELogo.png' %}">
+        <title>Вход</title>
+        <link rel="stylesheet"
+              href="{% static 'plugins/overlayScrollbars/css/OverlayScrollbars.min.css' %}">
+        <!-- Google Font: Source Sans Pro -->
+        <link rel="stylesheet"
+              href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+        <!-- Font Awesome -->
+        <link rel="stylesheet"
+              href="{% static 'plugins/fontawesome-free/css/all.min.css' %}">
+        <!-- Theme style -->
+        <link rel="stylesheet" href="{% static 'dist/css/adminlte.css' %}">
+        {% block head %}{% endblock %}
+    </head>
+    <body class="hold-transition login-page">
+        <div class="login-box">
+            <div class="login-logo">
+                <img src="{% static 'dist/img/AdminLTELogo.png' %}"
+                     style="width: 250px;
+                            height: auto"
+                     alt="House 24">
+            </div>
+            <!-- /.login-logo -->
+            <div class="card card-primary card-outline card-outline-tabs">
+                <div class="card-header p-0 border-bottom-0">
+                    <ul class="nav nav-tabs-custom align-items-stretch"
+                        id="custom-tabs-four-tab"
+                        role="tablist">
+                        <li class="nav-item flex-grow-1 text-center">
+                            <a class="nav-link active"
+                               id="custom-tabs-four-home-tab"
+                               data-toggle="pill"
+                               href="#custom-tabs-four-home"
+                               role="tab"
+                               aria-controls="custom-tabs-four-home"
+                               aria-selected="true">Для жильцов</a>
+                        </li>
+                        <li class="nav-item flex-grow-1 text-center">
+                            <a class="nav-link"
+                               id="custom-tabs-four-profile-tab"
+                               data-toggle="pill"
+                               href="#custom-tabs-four-profile"
+                               role="tab"
+                               aria-controls="custom-tabs-four-profile"
+                               aria-selected="false">Для администрации</a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content" id="custom-tabs-four-tabContent">
+                        <div class="tab-pane fade show active"
+                             id="custom-tabs-four-home"
+                             role="tabpanel"
+                             aria-labelledby="custom-tabs-four-home-tab">
+                            <form id="login-client" method="post">
+                                {% csrf_token %}
+                                <p class="login-box-msg">Вход в личный кабинет</p>
+                                <input type="email"
+                                       name="username"
+                                       class="form-control mb-3 rounded-0"
+                                       placeholder="Email"
+                                       required=""
+                                       id="id_email">
+                                <input type="password"
+                                       name="password"
+                                       class="form-control mb-3 rounded-0"
+                                       placeholder="Пароль"
+                                       required=""
+                                       id="id_password">
+                                <div class="row">
+                                    <div class="col-8 mb-3">
+                                        <div class="icheck-primary">
+                                            <input type="checkbox" name="remember_me" id="id_remember_me">
+                                            <label for="id_remember_me">Запомнить меня</label>
+                                        </div>
+                                    </div>
+                                    <p class="mb-3">
+                                        <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+                                    </p>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-block">Вход</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="tab-pane fade"
+                             id="custom-tabs-four-profile"
+                             role="tabpanel"
+                             aria-labelledby="custom-tabs-four-profile-tab">
+                            <form id="login-admin" method="post">
+                                {% csrf_token %}
+                                <p class="login-box-msg">Вход в панель управления</p>
+                                <input type="email"
+                                       name="username"
+                                       class="form-control mb-3 rounded-0"
+                                       placeholder="Email"
+                                       required=""
+                                       id="id_email">
+                                <input type="password"
+                                       name="password"
+                                       class="form-control mb-3 rounded-0"
+                                       placeholder="Пароль"
+                                       required=""
+                                       id="id_password">
+                                <div class="row">
+                                    <div class="col-8 mb-3">
+                                        <div class="icheck-primary">
+                                            <input type="checkbox" name="remember_me" id="id_remember_me">
+                                            <label for="id_remember_me">Запомнить меня</label>
+                                        </div>
+                                    </div>
+                                    <p class="mb-1">
+                                        <a href="{% url 'password_reset' %}">Забыли пароль?</a>
+                                    </p>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary btn-block">Вход</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.login-box -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"
+                integrity="sha256-xLD7nhI62fcsEZK2/v8LsBcb4lG7dgULkuXoXB/j91c="
+                crossorigin="anonymous"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+        <script src="{% static '/plugins/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+        <script src="{% static '/dist/js/adminlte.min.js' %}"></script>
+        <script src="https://kit.fontawesome.com/cce590ac92.js"
+                crossorigin="anonymous"></script>
+        <script src="{% static '/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js' %}"></script>
+        <script type="module"
+                src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+        <script nomodule
+                src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+        <script src="https://unpkg.com/ionicons@4.5.10-0/dist/ionicons.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+                integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+                crossorigin="anonymous"
+                referrerpolicy="no-referrer"></script>
+        {#    <script src='https://www.google.com/recaptcha/api.js'></script>#}
+        <script>
+        $("#login-admin").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore : '.ignore',
+            rules : {
+                'username': {
+                    required: true
+                },
+                'password': {
+                    required: true
+                },
+            },
+            messages : {
+                'username': {
+                    required: "Обязательно укажите email",
+                    email: 'Проверьте правильность написания почты'
+                },
+                'password': {
+                    required: "Обязательно укажите Пароль"
+                },
+            }
+
+        });
+        $("#login-client").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore : '.ignore',
+            rules : {
+                'username': {
+                    required: true,
+                    email: true,
+                },
+                'password': {
+                    required: true
+                },
+            },
+            messages : {
+                'username': {
+                    required: "Обязательно укажите email",
+                    email: 'Проверьте правильность написания почты'
+                },
+                'password': {
+                    required: "Обязательно укажите Пароль"
+                },
+            }
+
+        });
+        </script>
+        {% block script %}
+        {% endblock %}
+    </body>
+</html>

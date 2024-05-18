@@ -1,0 +1,216 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Профиль владельца{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{% static 'flatpickr/dist/flatpickr.min.css' %}">
+{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Профиль владельца</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'clients' %}">Владельцы квартир</a>
+                        </li>
+                        <li class="breadcrumb-item">Профиль владельца</li>
+                        <li class="breadcrumb-item">Редактирование</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header p-0 border-bottom-0"></div>
+            <div class="card-body p-2">
+                <form id="client-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 col-12 pe-3">
+                            <div class="d-flex flex-wrap justify-content-center justify-content-sm-start">
+                                <div class="me-3 mb-3">
+                                    {% if form.avatar.value == '' %}
+                                        <img class="img-circle pull-left img-responsive"
+                                             style="width: 160px;
+                                                    height: 160px;
+                                                    object-fit: cover"
+                                             src="https://via.placeholder.com/600.png?text=No+Image"
+                                             alt="">
+                                    {% else %}
+                                        <img class="img-circle pull-left img-responsive"
+                                             style="width: 160px;
+                                                    height: 160px;
+                                                    object-fit: cover"
+                                             src="{{ form.instance.avatar.url }}"
+                                             alt="">
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow text-left">{% bootstrap_field form.avatar %}</div>
+                            </div>
+                            {% bootstrap_field form.first_name %}
+                            {% bootstrap_field form.last_name %}
+                            {% bootstrap_field form.patronymic %}
+                            {% bootstrap_field form.birthday %}
+                            <h3 class="p-0 pt-3 fs-5">Контактные данные</h3>
+                            <hr style="border-top: 1px solid darkgrey;">
+                            {% bootstrap_field form.phone %}
+                            {% bootstrap_field form.viber %}
+                            {% bootstrap_field form.telegram %}
+                            {% bootstrap_field form.email %}
+                        </div>
+                        <div class="col-md-6 col-12 ps-3">
+                            {% bootstrap_field form.status %}
+                            {% bootstrap_field form.ID %}
+                            {% bootstrap_field form.bio %}
+                            <h3 class="p-0 pt-3 fs-5">Изменить пароль</h3>
+                            <hr style="border-top: 1px solid darkgrey;">
+                            <div class="d-flex flex-wrap align-items-center mb-3">
+                                <div class="flex-grow-1">{% bootstrap_field form.password1 %}</div>
+                                <div class="" style="margin-top: 16px;">
+                                    <button class="btn btn-default rounded-0" id="generatePassword" type="button">Сгенерировать</button>
+                                </div>
+                                <div class="" style="margin-top: 16px;">
+                                    <button type="button"
+                                            class="btn btn-primary rounded-0"
+                                            style="height: 38px"
+                                            id="showPassword">
+                                        <i class="fa fa-eye" aria-hidden="true"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            {% bootstrap_field form.password2 %}
+                        </div>
+                    </div>
+                    <div class="col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script type="application/javascript"
+            src="{% static 'flatpickr/dist/flatpickr.js' %}"></script>
+    <script type="application/javascript"
+            src="{% static 'flatpickr/dist/l10n/ru.js' %}"></script>
+    <script type="application/javascript">
+        $('.avatar').removeClass('form-control')
+
+        $(".birthday").flatpickr({
+            dateFormat: "Y-m-d",
+            locale: "ru", // locale for this instance only
+
+         });
+
+        $('.birthday').addClass('bg-white')
+        $.validator.addMethod("phoneUA", function (phone_number, element) {
+            return this.optional(element) || phone_number.length === 19 &&
+                phone_number.match(/^\+38 \(\d{3}\) \d{3}-?\d{2}-?\d{2}$/);
+        }, "Пример ввода: +38 (068) 512-23-16");
+        $("#client-form").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: '.ignore',
+            rules: {
+                password1: {
+                    required: true,
+                    minlength: 8,
+                },
+                password2: {
+                    required: true,
+                    minlength: 8,
+                    equalTo: "#id_password1"
+                },
+                email: {
+                    required: true,
+                    email: true
+                },
+                first_name: {
+                    required: true,
+                },
+                last_name: {
+                    required: true,
+                },
+                patronymic: {
+                    required: true,
+                },
+                ID: {
+                    required: true,
+                },
+                phone: {
+                    phoneUA: true,
+                },
+
+            },
+            messages: {
+                password1: {
+                    required: "Обязательно укажите пароль",
+                    minlength: 'Пароль не менее 5 символов',
+                },
+                password2: {
+                    required: "Обязательно повторите пароль",
+                    minlength: 'Пароль не менее 5 символов',
+                    equalTo: "Пароли не совпадают"
+                },
+                email: {
+                    required: "Обязательно укажите email",
+                    email: "Проверьте правильность email",
+                },
+                first_name: {
+                    required: "Обязательно укажите Имя",
+                },
+                last_name: {
+                    required: "Обязательно укажите Фамилию",
+                },
+                patronymic: {
+                    required: "Обязательно укажите отчество",
+                },
+                ID: {
+                    required: "Обязательно укажите ID",
+                },
+
+            }
+
+
+        });
+        $('#client-form').on("change", function (e) {
+            $(this).valid()
+        });
+    </script>
+    <script type="module"
+            src="{% static 'admin_panel/system_settings/personal/personal.js' %}"></script>
+{% endblock %}

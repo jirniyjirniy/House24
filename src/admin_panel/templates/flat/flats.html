@@ -1,0 +1,183 @@
+{% extends 'third_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2b %}Квартиры{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet"
+          href="{% static 'plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock %}
+{% block name %}Квартиры{% endblock %}
+{% block navigation %}<li class="breadcrumb-item active">Квартиры</li>{% endblock %}
+{% block action_list %}
+    <a class="btn btn-success" href="{% url 'flats_create' %}">Добавить квартиру</a>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'flats_filtered' %}" method="get" id="filter">
+        <table id="flat"
+               class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+                <tr>
+                    <th>№ квартиры</th>
+                    <th>Дом</th>
+                    <th>Секция</th>
+                    <th>Этаж</th>
+                    <th>Владелец</th>
+                    <th>Остаток (грн)</th>
+                    <th></th>
+                </tr>
+                <tr class="border-0">
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.number wrapper_class='' %}</td>
+                    <td style="min-width: 200px">{% bootstrap_field filter_form.house wrapper_class='' %}</td>
+                    <td style="min-width: 200px">{% bootstrap_field filter_form.section wrapper_class='' %}</td>
+                    <td style="min-width: 200px">{% bootstrap_field filter_form.floor wrapper_class='' %}</td>
+                    <td style="min-width: 200px">{% bootstrap_field filter_form.flat_owner wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.have_debts wrapper_class='' %}</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for flat in flats %}
+                    <tr class="border-0">
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">{{ flat.number }}</td>
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">{{ flat.house.title }}</td>
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">
+                            {% if flat.section is None %}
+                                (не указано)
+                            {% else %}
+                                {{ flat.section.title }}
+                            {% endif %}
+                        </td>
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">
+                            {% if flat.floor is None %}
+                                (не указано)
+                            {% else %}
+                                {{ flat.floor.title }}
+                            {% endif %}
+                        </td>
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">
+                            {% if flat.flat_owner is None %}
+                                (не указано)
+                            {% else %}
+                                {{ flat.flat_owner }}
+                            {% endif %}
+                        </td>
+                        <td style="cursor: pointer" data-href="{% url 'flats_detail' flat.id %}">
+                            {% if flat.personal_account is None or flat.personal_account == "" %}
+                                (нет счёта)
+                            {% else %}
+                                {% if flat.personal_account.balance > 0 %}
+                                    <span class="text-success">{{ flat.personal_account.balance }}</span>
+                                {% elif flat.personal_account.balance < 0 %}
+                                    <span class="text-danger">{{ flat.personal_account.balance }}</span>
+                                {% else %}
+                                    <span>{{ flat.personal_account.balance }}</span>
+                                {% endif %}
+                            {% endif %}
+                        </td>
+                        <td class="ps-1 pe-1">
+                            <div class="btn-group">
+                                <a class="btn btn-default"
+                                   href="{% url 'flats_update' flat.id %}"
+                                   role="button"><i class="fa-solid fa-pencil"></i></a>
+                                <button class="btn btn-default delete-confirmation delete-flat"
+                                        data-target="{{ flat.id }}"
+                                        role="button">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">{% bootstrap_pagination page_obj size='sm' %}</div>
+    <hr style="border-top: 1px solid darkgrey;">
+    <div>
+        <div class="d-flex flex-row flex-wrap">
+            <span>Количество квартир:&nbsp;</span> <span class="text-bold">{{ flats.count }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+             $('#flat').DataTable({
+                 searching: false,
+                paging: false,
+                select: true,
+                "bInfo" : false,
+                 orderCellsTop: true,
+                 "order": [],
+                 "columnDefs": [
+                    {
+                        "targets": 6, // First column
+                        "orderable": false
+                    },
+
+                 ]
+            });
+        });
+        if($('.form-house-select').val()==='') {
+            $('.select2-simple-section').select2({
+              placeholder: 'Выберите дом',
+              minimumResultsForSearch: -1
+
+            })
+            $('.select2-simple-floor').select2({
+              placeholder: 'Выберите дом',
+              minimumResultsForSearch: -1
+
+        })
+        }else{
+            $('.select2-simple-section').select2({
+              placeholder: '',
+              minimumResultsForSearch: -1
+            })
+            $('.select2-simple-floor').select2({
+              placeholder: '',
+              minimumResultsForSearch: -1
+
+            })
+        }
+        $(".delete-confirmation").on('click', function() {
+            if ( confirm('Вы уверены, что хотите удалить этот элемент?')){
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/flats/delete/${$(this).data('target')}/`,         /* Куда отправить запрос */
+                    method: 'post',             /* Метод запроса (post или get) */
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                        $('#filter').trigger('change')
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function(event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+    <script type="module" src="{% static 'admin_panel/house/flats.js' %}"></script>
+{% endblock %}

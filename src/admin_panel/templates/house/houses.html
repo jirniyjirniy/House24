@@ -1,0 +1,136 @@
+{% extends 'third_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2b %}Дома{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet"
+          href="{% static 'plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock %}
+{% block name %}Дома{% endblock %}
+{% block navigation %}<li class="breadcrumb-item active">Дома</li>{% endblock %}
+{% block action_list %}
+    <a class="btn btn-success" href="{% url 'create_house' %}">Добавить дом</a>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'filtered_houses' %}" method="get" id="filter">
+        <table id="house"
+               class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Название</th>
+                    <th>Адрес</th>
+                    <th></th>
+                </tr>
+                <tr class="border-0">
+                    <td class="ps-2 pe-2"></td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.title wrapper_class='' %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.address wrapper_class='' %}</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for house in houses %}
+                    <tr class="border-0 row_elem">
+                        <td style="cursor: pointer" data-href="{% url 'house_detail' house.id %}">{{ house.id }}</td>
+                        <td style="cursor: pointer" data-href="{% url 'house_detail' house.id %}">
+                            {% if house.title == "" %}
+                                (не указано)
+                            {% else %}
+                                {{ house.title }}
+                            {% endif %}
+                        </td>
+                        <td style="cursor: pointer" data-href="{% url 'house_detail' house.id %}">
+                            {% if house.address == "" %}
+                                (не указано)
+                            {% else %}
+                                {{ house.address }}
+                            {% endif %}
+                        </td>
+                        <td class="ps-1 pe-1 text-center">
+                            <a class="btn btn-default"
+                               href="{% url 'house_update' house.id %}"
+                               role="button"><i class="fa-solid fa-pencil"></i></a>
+                            <button class="btn btn-default delete-confirmation"
+                                    data-target="{{ house.id }}"
+                                    role="button">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">{% bootstrap_pagination page_obj size='sm' %}</div>
+    <hr style="border-top: 1px solid darkgrey;">
+    <div>
+        <div class="d-flex flex-row flex-wrap">
+            <span>Количество домов:&nbsp;</span> <span class="text-bold">{{ houses.count }}</span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#house').DataTable({
+                searching: false,
+                {#ordering:  false,#}
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+                    {
+                        "targets": 3, // First column
+                        "orderable": false
+                    },
+                ]
+            });
+        })
+        $(".delete-confirmation").on('click', function () {
+            let tr_elem = $(this).parents('.row_elem')
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/houses/delete/${$(this).data('target')}/`,
+                    method: 'post',
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {
+                        $('#filter').trigger('change')
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+
+        $('#filter').on('change', function () {
+            $(this).trigger('submit')
+        });
+    </script>
+{% endblock %}

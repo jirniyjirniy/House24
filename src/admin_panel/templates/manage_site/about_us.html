@@ -1,0 +1,259 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}О нас{% endblock %}
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css"
+          rel="stylesheet">
+{% endblock %}
+{% load thumbnail %}
+{% block content %}
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Редактирование страницы</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'update_personal' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">Редактирование страницы</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header ps-0 border-bottom-0 text-gray-dark">
+                <h5 class="p-0 fs-5">Редактирование страницы "О нас"</h5>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div>
+            <div class="card-body ps-0 pt-0">
+                <form method="post"
+                      action="{% url 'about_us' %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h5 class="p-0 mt-0 fs-5">Информация</h5>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {#                    {% bootstrap_form about_us_form %}#}
+                    <div class="row">
+                        <div class="col-md-8">
+                            {% bootstrap_field about_us_form.title %}
+                            {% bootstrap_field about_us_form.description %}
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="mb-2">Фото директора</h5>
+                            <img src="{% thumbnail about_us_form.instance.director_photo 'main' %}"
+                                 style="width: 250px;
+                                        height: 150px"
+                                 alt=""
+                                 class="">
+                            <div class="mb-3">
+                                <label class="form-label" for="id_about-director_photo">
+                                    Рекомендуемый размер:
+                                    (250x310)
+                                </label>
+                                <input type="file"
+                                       name="about-director_photo"
+                                       class=""
+                                       accept="image/*"
+                                       id="id_about-director_photo">
+                            </div>
+                        </div>
+                    </div>
+                    <h4 class="p-0 pt-3 fs-5">Фотогалерея</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {{ photo_formset.management_form }}
+                    <div class="row">
+                        {% for photo_form in photo_formset %}
+                            {% if forloop.last %}
+                                <div class="col-12 mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label d-block" for="id_photo-{{ forloop.counter0 }}-img">
+                                            Рекомендуемый
+                                            размер: (1200x1200)
+                                        </label>
+                                        <input type="file"
+                                               name="photo-{{ forloop.counter0 }}-img"
+                                               class=""
+                                               accept="image/*"
+                                               id="id_photo-{{ forloop.counter0 }}-img">
+                                    </div>
+                                    <input type="hidden"
+                                           name="photo-{{ forloop.counter0 }}-id"
+                                           id="id_photo-{{ forloop.counter0 }}-id">
+                                </div>
+                            {% else %}
+                                <div class="col-4 col-sm-2 text-center">
+                                    <img src="{% thumbnail photo_form.instance.img 'main' %}"
+                                         style="width: 144px;
+                                                height: 140px"
+                                         alt=""
+                                         class="">
+                                    <div class="mb-3">
+                                        <input type="file"
+                                               name="photo-{{ forloop.counter0 }}-img"
+                                               class="d-none"
+                                               accept="image/*"
+                                               id="id_photo-{{ forloop.counter0 }}-img">
+                                    </div>
+                                    <a href="{% url 'delete_photo' photo_form.id.value %}"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
+                                    <input type="hidden"
+                                           name="photo-{{ forloop.counter0 }}-id"
+                                           value="{{ photo_form.id.value }}"
+                                           id="id_photo-{{ forloop.counter0 }}-id">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <h4 class="p-0 pt-3 fs-5">Дополнительная информация</h4>
+                    <hr class="" style="border-top: 1px solid darkgrey;">
+                    {% bootstrap_field about_us_form.extra_title %}
+                    {% bootstrap_field about_us_form.extra_description %}
+                    <h4 class="p-0 pt-3 fs-5">Дополнительная фотогалерея</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {{ extra_photo_formset.management_form }}
+                    <div class="row">
+                        {% for extra_photo_form in extra_photo_formset %}
+                            {% if forloop.last %}
+                                <div class="col-12 mt-3">
+                                    <div class="mb-3">
+                                        <label class="form-label d-block"
+                                               for="extra_photo-{{ forloop.counter0 }}-img">
+                                            Рекомендуемый
+                                            размер: (1200x1200)
+                                        </label>
+                                        <input type="file"
+                                               name="extra_photo-{{ forloop.counter0 }}-img"
+                                               class=""
+                                               accept="image/*"
+                                               id="extra_photo-{{ forloop.counter0 }}-img">
+                                    </div>
+                                    <input type="hidden"
+                                           name="extra_photo-{{ forloop.counter0 }}-id"
+                                           id="id_extra_photo-{{ forloop.counter0 }}-id">
+                                </div>
+                            {% else %}
+                                <div class="col-4 col-sm-2 text-center">
+                                    <img src="{% thumbnail extra_photo_form.instance.img 'main' %}"
+                                         style="width: 144px;
+                                                height: 140px"
+                                         alt=""
+                                         class="">
+                                    <div class="mb-3">
+                                        <input type="file"
+                                               name="extra_photo-{{ forloop.counter0 }}-img"
+                                               class="d-none"
+                                               accept="image/*"
+                                               id="id_extra_photo-{{ forloop.counter0 }}-img">
+                                    </div>
+                                    <a href="{% url 'delete_photo' extra_photo_form.id.value %}"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
+                                    <input type="hidden"
+                                           name="extra_photo-{{ forloop.counter0 }}-id"
+                                           value="{{ extra_photo_form.id.value }}"
+                                           id="id_extra_photo-{{ forloop.counter0 }}-id">
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <h4 class="p-0 pt-3 fs-5">Документы</h4>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    {{ docs_formset.management_form }}
+                    <div class="col-12 col-md-6">
+                        {% for doc_form in docs_formset %}
+                            <div class="formset__item">
+                                <div class="mb-3">
+                                    <div class="d-flex flex-row justify-content-between">
+                                        <div class="d-flex flex-row align-items-center">
+                                            <div class="mr-3">
+                                                {% if doc_form.instance.get_extension == '.pdf' %}
+                                                    <i class="fa-regular fa-file-pdf fa-3x" style="width: 32px;"></i>
+                                                {% elif doc_form.instance.get_extension == '.jpg' %}
+                                                    <img src="{% thumbnail doc_form.instance.file 'main' %}"
+                                                         style="width: 50px;
+                                                                height: 60px"
+                                                         alt="">
+                                                {% else %}
+                                                    <i class="fa fa-file-o fa-3x pull-left"
+                                                       style="width: 32px"
+                                                       aria-hidden="true"></i>
+                                                {% endif %}
+                                            </div>
+                                            <div>
+                                                <label class="form-label d-block" for="id_docs-{{ forloop.counter0 }}-file">
+                                                    PDF, JPG (макс. размер
+                                                    20 Mb)
+                                                </label>
+                                                <input type="file"
+                                                       name="docs-{{ forloop.counter0 }}-file"
+                                                       value="{{ doc_form.id.value }}"
+                                                       class=""
+                                                       id="id_docs-{{ forloop.counter0 }}-file">
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'delete_docs' doc_form.id.value %}"><i class="fa fa-trash text-red" aria-hidden="true"></i></a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label" for="id_docs-{{ forloop.counter0 }}-name">
+                                        Название
+                                        документа
+                                    </label>
+                                    <input type="text"
+                                           value="{{ doc_form.name.value }}"
+                                           name="docs-{{ forloop.counter0 }}-name"
+                                           maxlength="100"
+                                           class="form-control rounded-0 shadow-none"
+                                           placeholder="Название документа"
+                                           id="id_docs-{{ forloop.counter0 }}-name">
+                                </div>
+                                <input type="hidden"
+                                       name="docs-{{ forloop.counter0 }}-id"
+                                       value="{{ doc_form.id.value }}"
+                                       id="id_docs-{{ forloop.counter0 }}-id">
+                            </div>
+                        {% endfor %}
+                        <button type="button" class="btn btn-success add__doc">Добавить документ</button>
+                    </div>
+                    <h4 class="p-0 fs-5 pt-3">Настройки SEO</h4>
+                    <hr class="pb-3" style="border-top: 1px solid darkgrey;">
+                    {% bootstrap_form seo_form %}
+                    <div class="text-center">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script type="module"
+            src="{% static 'admin_panel/manage_site/manage_site.js' %}"></script>
+    <script type="module"
+            src="{% static 'admin_panel/manage_site/about_us.js' %}"></script>
+{% endblock %}

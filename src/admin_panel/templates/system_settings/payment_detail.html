@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Платежные реквизиты{% endblock %}
+{% block content %}
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Платежные реквизиты</h4>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header p-0 border-bottom-0"></div>
+            <div class="card-body p-2">
+                <form method="post" action="{% url 'payment' %}">
+                    {% csrf_token %}
+                    {% for message in messages %}
+                        <div class="alert {% for tag in message.extra_tags.split %}{{ tag }}{% endfor %} fade show"
+                             role="alert">
+                            <div class="d-flex justify-content-end">
+                                <button class="close btn btn-danger"
+                                        type="button"
+                                        data-dismiss="alert"
+                                        aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <hr>
+                            <p class="text-center">{{ message| safe }}</p>
+                        </div>
+                    {% endfor %}
+                    <div class="row">
+                        <div class="col-lg-7 col-12">{% bootstrap_form form layout='vertical' %}</div>
+                    </div>
+                    <div class="col-sm-6 col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+{% endblock %}

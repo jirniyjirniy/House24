@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    {% block title_2b %}{% endblock %}
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet"
+          href="{% static '/plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+    {% block head_2b %}{% endblock %}
+{% endblock %}
+{% block content %}
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">
+                        {% block name %}{% endblock %}
+                    </h4>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+            <div class="row mb-3">
+                <div class="dropdown text-right">
+                    {% block action_list %}{% endblock %}
+                </div>
+                <!-- ./col -->
+            </div>
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header text-right p-2 pe-3">
+                <button type="button" class="btn btn-default clear_button">Очистить</button>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    {% block card_body %}{% endblock %}
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer d-flex flex-column">
+                {% block card_footer %}{% endblock %}
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block script %}
+    <script src="{% static '/plugins/select2/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script type="application/javascript">
+        $('.clear_button').on('click',function () {
+            $('input').each(function () {
+                $(this).val('')
+            })
+            $(".select2-simple").val('').trigger('change')
+            $(".select2-simple-section").val('').trigger('change')
+            $(".select2-simple-floor").val('').trigger('change')
+            $(".select2-simple-service").val('').trigger('change')
+            $(".select2").val('').trigger('change')
+
+             $("#filter").trigger('submit')
+
+        })
+    </script>
+    {% block  script_2b %}{% endblock %}
+{% endblock %}

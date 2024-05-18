@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Контакты{% endblock %}
+{% block head %}
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css"
+          rel="stylesheet">
+{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Редактирование страницы</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">Редактирование страницы</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header ps-0 border-bottom-0 text-gray-dark">
+                <h5 class="p-0 fs-5">Редактирование страницы "Контакты"</h5>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div>
+            <div class="card-body ps-0">
+                <form method="post"
+                      action="{% url 'contacts_page' %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <h5 class="p-0 fs-5">Контактная информация</h5>
+                    <hr style="border-top: 1px solid darkgrey;">
+                    <div class="row">
+                        <div class="col-12 col-md-8">
+                            {% bootstrap_field contacts_form.title %}
+                            {% bootstrap_field contacts_form.description %}
+                            {% bootstrap_field contacts_form.site_link %}
+                        </div>
+                        <div class="col-12 col-md-4">
+                            {% bootstrap_field contacts_form.full_name %}
+                            {% bootstrap_field contacts_form.location %}
+                            {% bootstrap_field contacts_form.address %}
+                            {% bootstrap_field contacts_form.phone %}
+                            {% bootstrap_field contacts_form.email %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">{% bootstrap_field contacts_form.coordinate %}</div>
+                    </div>
+                    <h4 class="p-0 fs-5 pt-3">Настройки SEO</h4>
+                    <hr class="pb-3" style="border-top: 1px solid darkgrey;">
+                    {% bootstrap_form seo_form %}
+                    <div class="text-center">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-ru-RU.min.js"
+            integrity="sha512-uCNUSqDrnthkeMqbxKoePE2CewCjUenOwh3/Fw8shLJ+bBppg6ynadVRVcL5EStFBq2GUKUrAJZgC2qs/Q5z9Q=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
+    <script type="module"
+            src="{% static 'admin_panel/manage_site/manage_site.js' %}"></script>
+{% endblock %}

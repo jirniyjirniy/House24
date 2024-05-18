@@ -1,0 +1,143 @@
+{% extends 'second_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2b %}Пользователи{% endblock %}
+{% block head_2b %}{% endblock %}
+{% block name %}Пользователи{% endblock %}
+{% block navigation %}<li class="breadcrumb-item active">Пользователи</li>{% endblock %}
+{% block action_list %}
+    <a class="btn btn-success" href="{% url 'personal_add' %}">Добавить пользователя</a>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'personal_filter' %}" method="get" id="filter">
+        {% csrf_token %}
+        <table id="users"
+               class="table border-0 table-bordered table-hover table-striped linkedRow w-100">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Пользователь</th>
+                    <th>Роль</th>
+                    <th>Телефон</th>
+                    <th>Email (логин)</th>
+                    <th>Статус</th>
+                    <th></th>
+                </tr>
+                <tr class="border-0">
+                    <td></td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.user %}</td>
+                    <td style="min-width: 190px">{% bootstrap_field filter_form.role %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.phone %}</td>
+                    <td style="min-width: 150px">{% bootstrap_field filter_form.email %}</td>
+                    <td style="min-width: 190px">{% bootstrap_field filter_form.status %}</td>
+                    <td></td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for personal in personals %}
+                    <tr style="cursor:pointer" class="border-0 row_elem">
+                        <td data-href="{% url 'personal_detail' personal.id %}">{{ personal.user.id }}</td>
+                        <td data-href="{% url 'personal_detail' personal.id %}">
+                            {{ personal.user.last_name }}&nbsp;{{ personal.user.first_name }}
+                        </td>
+                        <td data-href="{% url 'personal_detail' personal.id %}">{{ personal.get_role_display }}</td>
+                        <td data-href="{% url 'personal_detail' personal.id %}">{{ personal.user.phone }}</td>
+                        <td data-href="{% url 'personal_detail' personal.id %}">{{ personal.user.email }}</td>
+                        <td data-href="{% url 'personal_detail' personal.id %}">
+                            {% if personal.user.get_status_display == 'Активен' %}
+                                <span class="badge text-bg-success text-white">Активен</span>
+                            {% elif personal.user.get_status_display == 'Новый' %}
+                                <span class="badge text-bg-warning text-white">Новый</span>
+                            {% else %}
+                                <span class="badge text-bg-danger text-white">Отключён</span>
+                            {% endif %}
+                        </td>
+                        <td class="ps-1 pe-1">
+                            <div class="btn-group">
+                                <a class="btn btn-default" href="{% url 'personals' %}" role="button"><i class="fa-solid fa-rotate-right"></i></a>
+                                <a class="btn btn-default"
+                                   href="{% url 'personal_update' personal.user_id %}"
+                                   role="button"><i class="fa-solid fa-pencil"></i></a>
+                                <button class="btn btn-default delete-confirmation"
+                                        data-target="{{ personal.user.id }}"
+                                        role="button">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">{% bootstrap_pagination page_obj size='sm' %}</div>
+{% endblock %}
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#registration').DataTable({
+                searching: false,
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+                    {
+                        "targets": 0,
+                        "orderable": false
+                    },
+                    {
+                        "targets": 5,
+                        "orderable": false
+                    },
+                    {
+                        "targets": 6,
+                        "orderable": false
+                    },
+                ]
+
+            });
+        });
+        $(".delete-confirmation").on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                let tr_elem = $(this).parents('.row_elem')
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/personal-delete/${$(this).data('target')}/`,
+                    method: 'post',
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {
+                        tr_elem.remove()
+                    }
+                });
+            }
+        });
+        $('#filter').on('change', function () {
+
+            $(this).trigger('submit')
+
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+    </script>
+    <script type="module"
+            src="{% static 'admin_panel/system_settings/personal/personal.js' %}"></script>
+{% endblock %}

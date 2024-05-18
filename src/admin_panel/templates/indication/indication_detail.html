@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Показание счётчика{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Показание счетчикa</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right" style="font-size: 12px">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'indicators' %}">Счётчики</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'counter_indicators' indication.flat.id indication.service %}">Показание
+                            счётчиков, кв{{ indication.flat.number }}</a>
+                        </li>
+                        <li class="breadcrumb-item active">Показание счетчикa №{{ indication.number }}</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <div class="row ps-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                    <div class="d-flex">
+                        <div class=" d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                             style="height: 38px;
+                                    border: 1px solid #ced4da">№</div>
+                        <div class="">
+                            <div class="mb-3">
+                                <input type="text"
+                                       name="number"
+                                       class="form-control number rounded-0 shadow-none bg-white"
+                                       placeholder=""
+                                       readonly="readonly"
+                                       required=""
+                                       id="id_number"
+                                       value="{{ indication.number }}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ps-2 pb-3 pe-2">
+                        <span>от</span>
+                    </div>
+                    <div class="d-flex">
+                        <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                             style="height: 38px;
+                                    border: 1px solid #ced4da">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text"
+                                   name="date_published"
+                                   value="{{ indication.date_published }}"
+                                   class="form-control publishing-date rounded-0 shadow-none flatpickr-input bg-white"
+                                   placeholder=""
+                                   required=""
+                                   id="id_date_published"
+                                   readonly="readonly">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header text-right">
+                <a class="btn btn-primary"
+                   href="{% url 'update_indication' indication.id %}">Редактировать
+                показание</a>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <div class="col-12 col-md-8 ">
+                    <table class="table table-bordered table-striped table-view">
+                        <tbody>
+                            <tr>
+                                <td>Счетчик</td>
+                                <td>{{ indication.service }}</td>
+                            </tr>
+                            <tr>
+                                <td>Дом</td>
+                                <td>
+                                    <a {% if user_permission.house %} href="{% url 'house_detail' indication.flat.house.id %}" {% else %} href="#" {% endif %}>{{ indication.flat.house }}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Секция</td>
+                                <td>
+                                    {% if indication.flat.section %}
+                                        {{ indication.flat.section }}
+                                    {% else %}
+                                        не указано
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Квартира</td>
+                                <td>
+                                    <a {% if user_permission.flat %} href="{% url 'flats_detail' indication.flat.id %}" {% else %} href="#" {% endif %}>{{ indication.flat }}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Пользователь</td>
+                                <td>
+                                    {% if indication.flat.flat_owner is None %}
+                                        не указано
+                                    {% else %}
+                                        <a {% if user_permission.client %} href="{% url 'clients_detail' indication.flat.flat_owner.user.id %}" {% else %} href="#" {% endif %}>{{ indication.flat.flat_owner }}</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Текущие показания</td>
+                                <td>{{ indication.indication_val }}</td>
+                            </tr>
+                            <tr>
+                                <td>Ед. изм.</td>
+                                <td>{{ indication.service.measure }}</td>
+                            </tr>
+                            <tr>
+                                <td>Статус</td>
+                                <td>
+                                    {% if indication.get_status_display == 'Новое' %}
+                                        <span class="badge text-bg-warning text-white">Новое</span>
+                                    {% elif indication.get_status_display == 'Учтено' %}
+                                        <span class="badge text-bg-success text-white">Учтено</span>
+                                    {% elif indication.get_status_display == 'Учтено и оплачено' %}
+                                        <span class="badge text-bg-success text-white">Учтено и оплачено</span>
+                                    {% else %}
+                                        <span class="badge text-bg-primary text-white">Нулевое</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3"></div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}{% endblock %}

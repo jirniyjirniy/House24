@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}{{ house_form.title.value }}{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">{{ house_form.title.value }}</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'houses' %}">Дома</a>
+                        </li>
+                        <li class="breadcrumb-item">{{ house_form.title.value }}</li>
+                        <li class="breadcrumb-item">Редактирование</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-2">
+            <div class="card-header p-0 border-bottom-0"></div>
+            <div class="card-body p-2">
+                <form method="post"
+                      action="{% url 'house_update' house.id %}"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="row ps-0 pe-0">
+                            <div class="col-lg-4 col-12">
+                                {% bootstrap_form house_form layout='vertical' %}
+                                {{ photo_formset.management_form }}
+                                {% for photo_form in photo_formset %}
+                                    <div class="mb-3">
+                                        <label class="form-label" for="id_gallery-{{ forloop.counter0 }}-img">
+                                            Изображение
+                                            #{{ forloop.counter }}. Размер: (
+                                            {% if forloop.first %}
+                                                522x350
+                                            {% else %}
+                                                248x160
+                                            {% endif %}
+                                            )
+                                        </label>
+                                        <input type="file"
+                                               name="gallery-{{ forloop.counter0 }}-img"
+                                               class="rounded-0 shadow-none"
+                                               accept="image/*"
+                                               id="id_gallery-{{ forloop.counter0 }}-img">
+                                    </div>
+                                    <input type="hidden"
+                                           name="gallery-{{ forloop.counter0 }}-id"
+                                           value="{{ photo_form.id.value }}"
+                                           id="id_gallery-{{ forloop.counter0 }}-id">
+                                {% endfor %}
+                            </div>
+                            <div class="col-lg-8 col-12 mb-3">
+                                <div class="row d-flex justify-content-center">
+                                    {% for photo_form in photo_formset %}
+                                        {% if forloop.first %}
+                                            {% if photo_form.img.value == '' %}
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
+                                                    <img src="https://via.placeholder.com/600.png?text=No+Image"
+                                                         class="img-fluid"
+                                                         style="min-height: 350px;
+                                                                object-fit: cover"
+                                                         alt="Изображение #1. Размер: (522x350)">
+                                                </div>
+                                            {% else %}
+                                                <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
+                                                    <img src="{{ photo_form.instance.img.url }}"
+                                                         class="img-fluid"
+                                                         style="min-height: 350px;
+                                                                object-fit: cover"
+                                                         alt="Изображение #1. Размер: (522x350)">
+                                                </div>
+                                            {% endif %}
+                                            <div class="col-12 col-md-6 row d-flex align-content-between">
+                                            {% else %}
+                                                {% if photo_form.img.value == '' %}
+                                                    <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center">
+                                                        <img src="https://via.placeholder.com/600.png?text=No+Image"
+                                                             class="img-fluid"
+                                                             style="min-height: 160px;
+                                                                    object-fit: cover"
+                                                             alt="Изображение #2. Размер: (248x160)">
+                                                    </div>
+                                                {% else %}
+                                                    <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center">
+                                                        <img src="{{ photo_form.instance.img.url }}"
+                                                             class="img-fluid"
+                                                             style="min-height: 160px;
+                                                                    object-fit: cover"
+                                                             alt="Изображение #2. Размер: (248x160)">
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-lg-8">
+                                <div class="card card-primary card-outline card-outline-tabs">
+                                    <div class="card-header p-0 border-bottom-0">
+                                        <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
+                                            <li class="nav-item">
+                                                <a class="nav-link active"
+                                                   id="custom-tabs-four-home-tab"
+                                                   data-toggle="pill"
+                                                   href="#custom-tabs-four-home"
+                                                   role="tab"
+                                                   aria-controls="custom-tabs-four-home"
+                                                   aria-selected="false">Секции</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link"
+                                                   id="custom-tabs-four-profile-tab"
+                                                   data-toggle="pill"
+                                                   href="#custom-tabs-four-profile"
+                                                   role="tab"
+                                                   aria-controls="custom-tabs-four-profile"
+                                                   aria-selected="true">Этажи</a>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link"
+                                                   id="custom-tabs-four-messages-tab"
+                                                   data-toggle="pill"
+                                                   href="#custom-tabs-four-messages"
+                                                   role="tab"
+                                                   aria-controls="custom-tabs-four-messages"
+                                                   aria-selected="false">Пользователи</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="tab-content" id="custom-tabs-four-tabContent">
+                                            <div class="tab-pane fade active show"
+                                                 id="custom-tabs-four-home"
+                                                 role="tabpanel"
+                                                 aria-labelledby="custom-tabs-four-home-tab">
+                                                {{ section_formset.management_form }}
+                                                {% for section_form in section_formset %}
+                                                    <div class="formset__item text-left">
+                                                        <div class="mb-3 row">
+                                                            <div class="col-9 col-sm-11 pe-0">{% bootstrap_field section_form.title %}</div>
+                                                            <div class="col-3 col-sm-1 pe-0 ps-0"
+                                                                 style="height: 38px;
+                                                                        margin-top: 32px">
+                                                                <button type="button"
+                                                                        class="btn btn-default h-100 rounded-0 section__delete bg-danger">
+                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden"
+                                                               name="section-{{ forloop.counter0 }}-id"
+                                                               value="{{ section_form.id.value }}"
+                                                               id="id_section-{{ forloop.counter0 }}-id">
+                                                        <div class="">
+                                                            <div class="form-check">
+                                                                <input type="checkbox"
+                                                                       name="section-{{ forloop.counter0 }}-DELETE"
+                                                                       class="form-check-input"
+                                                                       id="id_section-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">
+                                                                <label class="form-check-label"
+                                                                       for="id_section-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                <div class="text-right">
+                                                    <button type="button" class="btn btn-success add__section">Добавить</button>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade"
+                                                 id="custom-tabs-four-profile"
+                                                 role="tabpanel"
+                                                 aria-labelledby="custom-tabs-four-profile-tab">
+                                                {{ floor_formset.management_form }}
+                                                {% for floor_form in floor_formset %}
+                                                    <div class="formset__item text-left">
+                                                        <div class="mb-3 row">
+                                                            <div class="col-9 col-sm-11 pe-0">{% bootstrap_field floor_form.title %}</div>
+                                                            <div class="col-3 col-sm-1 pe-0 ps-0"
+                                                                 style="height: 38px;
+                                                                        margin-top: 32px">
+                                                                <button type="button"
+                                                                        class="btn btn-default h-100 rounded-0 section__delete bg-danger">
+                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden"
+                                                               name="floor-{{ forloop.counter0 }}-id"
+                                                               value="{{ floor_form.id.value }}"
+                                                               id="id_floor-{{ forloop.counter0 }}-id">
+                                                        <div class="">
+                                                            <div class="form-check">
+                                                                <input type="checkbox"
+                                                                       name="floor-{{ forloop.counter0 }}-DELETE"
+                                                                       class="form-check-input"
+                                                                       id="id_floor-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">
+                                                                <label class="form-check-label"
+                                                                       for="id_floor-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                <div class="text-right">
+                                                    <button type="button" class="btn btn-success add__floor">Добавить</button>
+                                                </div>
+                                            </div>
+                                            <div class="tab-pane fade"
+                                                 id="custom-tabs-four-messages"
+                                                 role="tabpanel"
+                                                 aria-labelledby="custom-tabs-four-messages-tab">
+                                                {{ house_user_formset.management_form }}
+                                                <div class="personal__select d-none">
+                                                    <select name="" id="xxx">
+                                                        <option selected>Выберите...</option>
+                                                        {% for personal in personals %}
+                                                            <option value="{{ personal.id }}">{{ personal.user.last_name }}&nbsp;{{ personal.user.first_name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                {% for house_user_form in house_user_formset %}
+                                                    <div class="formset__item text-left">
+                                                        <div class="row">
+                                                            <div class="col-12 col-sm-8 col-md-7 pe-0">{% bootstrap_field house_user_form.user %}</div>
+                                                            <div class="col-10 col-sm-3 col-md-4 pe-0">
+                                                                <div class="mb-3">
+                                                                    <label class="form-label" for="role">Роль</label>
+                                                                    <select disabled name="role" class="form-select rounded-0 shadow-none">
+                                                                        <option id="role" selected></option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-2 col-sm-1 col-md-1 ps-0">
+                                                                <button type="button"
+                                                                        class="btn btn-default rounded-0 personal__delete bg-danger"
+                                                                        style="margin-top: 32px;
+                                                                               height: 38px">
+                                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden"
+                                                               name="personal-{{ forloop.counter0 }}-id"
+                                                               value="{{ house_user_form.id.value }}"
+                                                               id="id_personal-{{ forloop.counter0 }}-id">
+                                                        <div class="">
+                                                            <div class="form-check">
+                                                                <input type="checkbox"
+                                                                       name="personal-{{ forloop.counter0 }}-DELETE"
+                                                                       class="form-check-input"
+                                                                       id="id_personal-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">
+                                                                <label class="form-check-label"
+                                                                       for="id_personal-{{ forloop.counter0 }}-DELETE"
+                                                                       style="display: none">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                <div class="text-right">
+                                                    <button type="button" class="btn btn-success add__personal">Добавить</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script type="module" src="{% static 'admin_panel/house/house.js' %}"></script>
+{% endblock %}

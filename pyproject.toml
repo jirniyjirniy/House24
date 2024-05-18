@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "house24"
+version = "0.1.0"
+description = "house24 dependencies"
+authors = ["jirniy <nikitach.fw@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django-bootstrap5= "23.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

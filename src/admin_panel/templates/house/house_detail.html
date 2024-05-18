@@ -1,0 +1,162 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}Дом {{ house.title }}{% endblock %}
+{% block head %}{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Дом {{ house.title }}</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'roles' %}">Главная</a>
+                            </li>
+                        {% else %}
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'houses' %}">Дома</a>
+                        </li>
+                        <li class="breadcrumb-item active">Дом {{ house.title }}</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div>
+        <!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header text-right">
+                <a class="btn btn-primary" href="{% url 'house_update' house.id %}">Редактировать дом</a>
+            </div>
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-xs-12 col-lg-4">
+                        <table class="table table-bordered table-striped table-view">
+                            <tbody>
+                                <tr>
+                                    <td class="font-weight-bold">Название</td>
+                                    <td>
+                                        {% if house.title == "" %}
+                                            (не указано)
+                                        {% else %}
+                                            {{ house.title }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Адрес</td>
+                                    <td>
+                                        {% if house.address == "" %}
+                                            (не указано)
+                                        {% else %}
+                                            {{ house.address }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Секций</td>
+                                    <td>{{ house.section_set.count }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Этажей</td>
+                                    <td>{{ house.floor_set.count }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="font-weight-bold">Пользователи</td>
+                                    <td>
+                                        {% if users %}
+                                            {% for user in users %}
+                                                <p class="no-margin">
+                                                    <strong>{{ user.user.get_role_display }}:</strong>
+                                                    <a {% if user_permission.users %} href="{% url 'personal_detail' user.user.id %}" {% else %} href="#" {% endif %}>{{ user.user }}</a>
+                                                </p>
+                                            {% endfor %}
+                                        {% else %}
+                                            (не указаны)
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-xs-12 col-lg-8">
+                        <div class="row d-flex justify-content-center">
+                            {% for photo in photos %}
+                                {% if forloop.first %}
+                                    {% if photo.img == '' %}
+                                        <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
+                                            <img src="https://via.placeholder.com/600.png?text=No+Image"
+                                                 class="img-fluid"
+                                                 style="min-height: 350px;
+                                                        object-fit: cover"
+                                                 alt="Изображение #1. Размер: (522x350)">
+                                        </div>
+                                    {% else %}
+                                        <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
+                                            <img src="{{ photo.img.url }}"
+                                                 class="img-fluid"
+                                                 style="min-height: 350px;
+                                                        object-fit: cover"
+                                                 alt="Изображение #1. Размер: (522x350)">
+                                        </div>
+                                    {% endif %}
+                                    <div class="col-12 col-md-6 row d-flex align-content-between">
+                                    {% else %}
+                                        {% if photo.img == '' %}
+                                            <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center">
+                                                <img src="https://via.placeholder.com/600.png?text=No+Image"
+                                                     class="img-fluid"
+                                                     style="min-height: 160px;
+                                                            object-fit: cover"
+                                                     alt="Изображение #2. Размер: (248x160)">
+                                            </div>
+                                        {% else %}
+                                            <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center">
+                                                <img src="{{ photo.img.url }}"
+                                                     class="img-fluid"
+                                                     style="min-height: 160px;
+                                                            object-fit: cover"
+                                                     alt="Изображение #2. Размер: (248x160)">
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3"></div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script type="application/javascript">
+        $("form").on('submit', function () {
+            return confirm('Вы уверены, что хотите удалить этот элемент?');
+
+        });
+    </script>
+{% endblock %}
