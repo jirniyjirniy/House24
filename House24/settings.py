@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = os.getenv('SECRET_KEY', 'key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -37,10 +37,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'django.contrib.humanize',
+
     "src.accounts.apps.AccountsConfig",
     "src.admin_panel.apps.AdminPanelConfig",
     "src.website.apps.WebsiteConfig",
     "src.cabinet.apps.CabinetConfig",
+
     "django_bootstrap5",
     "django_summernote",
     "easy_thumbnails",
@@ -69,6 +72,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
+                'django.template.context_processors.media',
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "src.cabinet.middlewares.user_info",
@@ -76,6 +80,8 @@ TEMPLATES = [
             "libraries": {
                 "check_relation": "src.admin_panel.templatetags.check_relation",
                 "check_flat": "src.admin_panel.templatetags.check_flat",
+                "check_personal_account": "src.admin_panel.templatetags.check_personal_account",
+                'check_email': 'src.admin_panel.templatetags.check_email',
             },
         },
     },
@@ -121,9 +127,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "uk"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Europe/Kyiv"
 
 USE_I18N = True
 
@@ -148,11 +154,17 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APPEND_SLASH = True
 AUTHENTICATION_BACKENDS = ["src.accounts.authentication.ModelBackend"]
 
-EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS")
-EMAIL_HOST = os.getenv("EMAIL_HOST")
-EMAIL_PORT = os.getenv("EMAIL_PORT")
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
+# EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS")
+# EMAIL_HOST = os.environ.get("EMAIL_HOST")
+# EMAIL_PORT = os.environ.get("EMAIL_PORT")
+# EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+# EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'faceit.kawai@gmail.com'
+EMAIL_HOST_PASSWORD = 'wbxl gubi ohjg jcsz'
 
 THUMBNAIL_ALIASES = {
     "": {
@@ -177,3 +189,10 @@ SUMMERNOTE_THEME = "bs5"
 INTERNAL_IPS = [
     "127.0.0.1",
 ]
+
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_BROKER_URL = "redis://127.0.0.1:6379/0"
+CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}
+CELERY_RESULT_BACKEND = "redis://127.0.0.1:6379/0"
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'

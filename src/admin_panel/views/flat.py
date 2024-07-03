@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.db.models import Q
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
+from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView, FormView
 
-from src.admin_panel.forms.house import FlatForm, FlatsFilterForm
+from src.admin_panel.forms.house import FlatForm, FlatsFilterForm, InvitationForm
 from src.admin_panel.models import Flat
+from src.admin_panel.tasks import send_invitation
 
 
 class FlatListView(ListView):
@@ -85,7 +87,7 @@ class FlatDetailView(DetailView):
 
 class FlatUpdateView(UpdateView):
     model = Flat
-    template_name = "flat/flat_form.html"
+    template_name = "flat/flat_update.html"
     form_class = FlatForm
     success_url = reverse_lazy("flats")
 
@@ -93,3 +95,23 @@ class FlatUpdateView(UpdateView):
 class FlatDeleteView(DeleteView):
     queryset = Flat.objects.all()
     success_url = reverse_lazy("flats")
+
+
+class SendInvitation(FormView):
+    template_name = 'invitation/invitation.html'
+    form_class = InvitationForm
+    success_url = reverse_lazy('send_invitation')
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        context = {"form": form}
+        return render(request, self.template_name, context)
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            send_invitation.delay(to=form.cleaned_data["email"])
+            return redirect('send_invitation')
+        else:
+            context = {"form": form}
+            return render(request, self.template_name, context)

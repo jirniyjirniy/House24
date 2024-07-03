@@ -6,6 +6,7 @@ from django.core import validators
 from django.db import transaction
 
 from src.admin_panel.models.accounts import Personal
+from src.admin_panel.tasks import notification_password_changed
 
 User = get_user_model()
 
@@ -135,7 +136,7 @@ class PersonalUpdateForm(UserCreationForm):
             else:
                 personal.user.set_password(self.cleaned_data.get("password1"))
                 personal.user.save()
-                # TODO: сделать отправку на почту об измененении пароля
+                notification_password_changed.delay(personal.user.email)
         return user
 
 

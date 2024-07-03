@@ -1,4 +1,5 @@
-let measureTotal = $('#id_measure_formset-TOTAL_FORMS');
+let measureTotal = $('#id_measure_formset-TOTAL_FORMS')
+
 
 $("[name$='DELETE'], [for$='DELETE']").hide()
 $('body').on('click', '.service__delete', function () {
@@ -12,8 +13,8 @@ $('body').on('click', '.service__delete', function () {
             })
         }
     }
-})
 
+})
 $('body').on('click', '.measure__delete', function () {
     if ($(this).hasClass('dsbld')) {
         alert('Эта единица измерения используется в услугах. Удаление невозможно.')
@@ -25,6 +26,7 @@ $('body').on('click', '.measure__delete', function () {
             })
         }
     }
+
 })
 
 $('.add__measure').on('click', function () {
@@ -49,12 +51,13 @@ $('.add__measure').on('click', function () {
         `
     )
     measureTotal.val(Number(measureTotal.val()) + 1);
+
 })
+
 
 let serviceTotal = $('#id_service_formset-TOTAL_FORMS')
 $('.add__service').on('click', function () {
     let measureSelect = $('.measure__select')
-
     $(this).before(
         `
         <div class="formset__item">
@@ -70,7 +73,7 @@ $('.add__service').on('click', function () {
                         <label class="form-label" for="id_service_formset-${serviceTotal.val()}-measure">Ед. изм.</label>
                         <select name="service_formset-${serviceTotal.val()}-measure" class="form-select rounded-0 shadow-none" id="id_service_formset-${serviceTotal.val()}-measure">
                             <option value="" selected>Выберите...</option>
-
+                            ${measureSelect.html()}>
                         </select>
                     </div>
                 </div>
@@ -96,5 +99,5 @@ $('.add__service').on('click', function () {
     )
     serviceTotal.val(Number(serviceTotal.val()) + 1);
 
-    id_service_formset-${serviceTotal.val()}-measure
 })
+

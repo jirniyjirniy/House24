@@ -6,6 +6,7 @@ from django.db import transaction
 
 from src.admin_panel.forms.accounts import User
 from src.admin_panel.models import FlatOwner, House
+from src.admin_panel.tasks import notification_password_changed
 
 
 class ClientSignUpForm(UserCreationForm):
@@ -200,8 +201,7 @@ class ClientUpdateForm(UserChangeForm):
         if self.cleaned_data.get("password1") == self.cleaned_data.get("password2"):
             obj.user.set_password(self.cleaned_data.get("password1"))
             obj.user.save()
-            # TODO: сообщение о смене пароля
-
+            notification_password_changed(obj.user.email)
         return user
 
 

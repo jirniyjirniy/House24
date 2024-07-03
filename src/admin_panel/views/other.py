@@ -13,10 +13,6 @@ from src.admin_panel.models import Personal
 
 
 class StaffRequiredMixin:
-    """
-    Mixin which requires that the authenticated user is a staff member.
-    """
-
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_staff:

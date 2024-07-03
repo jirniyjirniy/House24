@@ -1,8 +1,152 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body></body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Показание счётчика
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'flatpickr/dist/flatpickr.min.css' %}">
+{% endblock %}
+
+
+
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Показание счетчикa</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item"><a href="{% url 'roles' %}">Главная</a></li>
+                        {% else %}
+                            <li class="breadcrumb-item"><a
+                                    href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item"><a style="font-size: 12px"
+                                                       href="{% url 'indicators' %}">Счётчики</a></li>
+                        <li class="breadcrumb-item"><a style="font-size: 12px"
+                                                       href="{% url 'counter_indicators' form.instance.flat.id form.instance.service.id %}">Показания
+                            счётиков, кв {{ form.instance.flat.number }}</a></li>
+                        <li class="breadcrumb-item" style="font-size: 12px">Показания счётчика
+                            №{{ form.instance.number }}</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div><!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <form method="post" id="indication-form" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row ps-2">
+                <div class="col-12">
+                    <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                        <div class="d-flex">
+                            <div class=" d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                №
+                            </div>
+                            <div class="">
+                                {% bootstrap_field form.number %}
+                            </div>
+                        </div>
+                        <div class="ps-2 pb-3 pe-2"><span>от</span></div>
+                        <div class="d-flex">
+                            <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                            {% bootstrap_field form.date_published %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Default box -->
+            <div class="card card-primary card-outline card-success ps-3">
+                <div class="card-header p-0 border-bottom-0">
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col-12 col-md-6">
+                            {% bootstrap_field form.house %}
+                            {% bootstrap_field form.section %}
+                            {% bootstrap_field form.flat %}
+                            {% bootstrap_field form.service %}
+
+                        </div>
+                        <div class="col-12 col-md-6">
+                            {% bootstrap_field form.status %}
+                            {% bootstrap_field form.indication_val %}
+                        </div>
+                    </div>
+                    <div class="col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+
+                </div>
+
+            </div>
+        </form>
+
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="application/javascript" src="{% static '/flatpickr/dist/flatpickr.js' %}"></script>
+    <script type="application/javascript" src="{% static '/flatpickr/dist/l10n/ru.js' %}"></script>
+    <script type="application/javascript">
+        $(".publishing-date").flatpickr({
+            dateFormat: "d.m.Y",
+            locale: "ru", // locale for this instance only
+        });
+        $('.publishing-date').addClass('bg-white')
+        $.validator.addMethod("positiveNumber", function (value, element) {
+            if (value) {
+                return parseFloat(value) >= 0;
+            }
+            return true;
+        }, "Укажите положительное значение");
+        $("#indication-form").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: '.ignore',
+            rules: {
+                'indication_val': {
+                    positiveNumber: true
+                },
+            },
+            messages: {
+                'service': {
+                    required: "Обязательно укажите счётчик"
+                },
+                'flat': {
+                    required: "Обязательно укажите квартиру"
+                },
+                'indication_val': {
+                    required: "Обязательно укажите расход"
+
+                },
+            }
+
+        });
+    </script>
+    <script type="module" src="{% static 'admin_panel/indication/update_indications.js' %}"></script>
+{% endblock %}

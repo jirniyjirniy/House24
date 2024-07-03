@@ -5,7 +5,7 @@ from src.admin_panel.models import Flat, House, Indication, Section, Service
 
 
 class IndicationForm(forms.ModelForm):
-    number = forms.CharField(widget=forms.TextInput(attrs={"class": "number ignore", "placeholder": ""}))
+    number = forms.CharField(widget=forms.TextInput(attrs={"class": "number ignore", "placeholder": ""}), label='')
     section = forms.ModelChoiceField(
         queryset=Section.objects.all(),
         label="Секция",

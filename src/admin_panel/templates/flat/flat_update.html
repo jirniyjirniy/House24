@@ -1,8 +1,108 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body></body>
-</html>
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Квартира №{{ form.number.value }}, {{ form.instance.house.title }}
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static '/plugins/select2/css/select2.css' %}">
+{% endblock %}
+
+{% block content %}
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Квартира №{{ form.number.value }}, {{ form.instance.house.title }}</h4>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            {% if user_permission.statistics %}
+                                <li class="breadcrumb-item"><a href="{% url 'roles' %}">Главная</a></li>
+                            {% else %}
+                                <li class="breadcrumb-item"><a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                                </li>
+                            {% endif %}
+                            <li class="breadcrumb-item"><a href="{% url 'flats' %}">Квартиры</a></li>
+                            <li class="breadcrumb-item">Квартира
+                                №{{ form.number.value }}, {{ form.instance.house.title }}</li>
+                            <li class="breadcrumb-item">Редактирование</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="card card-primary card-outline card-success ps-3">
+                <div class="card-header p-0 border-bottom-0">
+                </div>
+                <div class="card-body p-2">
+                    <form id="flat-form" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                {% bootstrap_field form.number %}
+                                {% bootstrap_field form.square %}
+                                {% bootstrap_field form.house %}
+                                {% bootstrap_field form.section %}
+                                {% bootstrap_field form.floor %}
+                                {% bootstrap_field form.flat_owner %}
+                                {% bootstrap_field form.tariff %}
+                            </div>
+                            <div class="col-12 col-md-6">
+                                {% bootstrap_field form.personal_account_res %}
+                                {% bootstrap_field form.personal_account %}
+                            </div>
+                        </div>
+                        <div class="col-12 text-right">
+                            {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                            {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+        <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static '/plugins/select2/js/select2.full.min.js' %}"></script>
+    <script type="module" src="{% static 'admin_panel/house/flat.js' %}"></script>
+    <script>
+        $("#flat-form").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: '.ignore',
+            rules: {
+                'number': {
+                    number: false,
+                }
+            },
+            messages: {
+                'number': {
+                    required: "Обязательно укажите номер квартиры"
+                },
+                'house': {
+                    required: "Обязательно укажите дом"
+                },
+            }
+
+        });
+    </script>
+{% endblock %}

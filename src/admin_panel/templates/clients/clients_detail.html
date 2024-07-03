@@ -148,7 +148,7 @@
                                         {% if flat.house is None %}
                                             не указано
                                         {% else %}
-                                            <a {% if user_permission.house %} href="{% url 'read_house' flat.house.id %}" {% else %} href="#" {% endif %}>{{ flat.house }}</a>
+                                            <a {% if user_permission.house %} href="{% url 'house_detail' flat.house.id %}" {% else %} href="#" {% endif %}>{{ flat.house }}</a>
                                         {% endif %}
                                     </td>
                                     <td>
@@ -159,13 +159,13 @@
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a {% if user_permission.flat %} href="{% url 'read_flat' flat.id %}" {% else %} href="#" {% endif %}>{{ flat.number }}</a>
+                                        <a {% if user_permission.flat %} href="{% url 'flats_detail' flat.id %}" {% else %} href="#" {% endif %}>{{ flat.number }}</a>
                                     </td>
                                     <td>
                                         {% if flat.personal_account is None or flat.personal_account == '' %}
                                             не указано
                                         {% else %}
-                                            <a {% if user_permission.personal_account %} href="{% url 'read_personal_account' flat.personal_account.id %}" {% else %} href="#" {% endif %}>{{ flat.personal_account }}</a>
+                                            <a {% if user_permission.personal_account %} href="{% url 'personal_account_detail' flat.personal_account.id %}" {% else %} href="#" {% endif %}>{{ flat.personal_account }}</a>
                                         {% endif %}
                                     </td>
                                 </tr>

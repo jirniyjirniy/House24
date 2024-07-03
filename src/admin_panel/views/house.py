@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
@@ -7,7 +8,8 @@ from django.views.generic import DetailView, FormView, ListView, View
 
 from src.admin_panel.forms.house import FloorFormset, HouseFilterForm, HouseForm, HouseUserFormset, SectionFormset
 from src.admin_panel.forms.website import HousePhotoFormset, PhotoFormset
-from src.admin_panel.models import Floor, Gallery, House, HouseUser, Personal, Photo, Section
+from src.admin_panel.models import Floor, Gallery, House, HouseUser, Personal, Photo, Section, Flat, PersonalAccount, \
+    FlatOwner, CustomUser, TariffSystem, Service, Indication
 
 from .other import StaffRequiredMixin
 
@@ -92,11 +94,11 @@ class CreateHouseView(StaffRequiredMixin, FormView):
         house_user_formset = HouseUserFormset(request.POST, request.FILES, prefix="personal")
 
         if (
-            section_formset.is_valid()
-            and floor_formset.is_valid()
-            and photo_formset.is_valid()
-            and house_user_formset.is_valid()
-            and house_form.is_valid()
+                section_formset.is_valid()
+                and floor_formset.is_valid()
+                and photo_formset.is_valid()
+                and house_user_formset.is_valid()
+                and house_form.is_valid()
         ):
             house_obj = house_form.save()
             house_user_instance = house_user_formset.save(commit=False)
@@ -161,11 +163,11 @@ class UpdateHouseView(StaffRequiredMixin, FormView):
         house_user_formset = HouseUserFormset(request.POST, request.FILES, prefix="personal")
 
         if (
-            section_formset.is_valid()
-            and floor_formset.is_valid()
-            and house_form.is_valid()
-            and photo_formset.is_valid()
-            and house_user_formset.is_valid()
+                section_formset.is_valid()
+                and floor_formset.is_valid()
+                and house_form.is_valid()
+                and photo_formset.is_valid()
+                and house_user_formset.is_valid()
         ):
             house_obj = house_form.save()
             house_user_instances = house_user_formset.save(commit=False)
@@ -231,4 +233,120 @@ class GetHouseInfoView(View):
             "floors": floor,
             "flat": flat,
         }
+        return JsonResponse(context, safe=False)
+
+
+class GetSectionInfoView(View):
+    def get(self, request, pk, *args, **kwargs):
+        section = Section.objects.prefetch_related("flat_set").get(pk=pk)
+        flats = serializers.serialize("json", section.flat_set.all())
+        context = {
+            'flats': flats,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetAllFlatsView(View):
+    def get(self, request):
+        flats = Flat.objects.all()
+        flats = serializers.serialize("json", flats)
+        all_personal_accounts = PersonalAccount.objects.all()
+        all_personal_accounts = serializers.serialize("json", all_personal_accounts)
+
+        context = {
+            "flats": flats,
+            "all_personal_accounts": all_personal_accounts,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetFlatOwnerView(View):
+    def get(self, request, pk):
+        flat_owner = FlatOwner.objects.prefetch_related('flat_set').get(pk=pk)
+        flats = flat_owner.flat_set.select_related('house').all()
+        personal_accounts = PersonalAccount.objects.filter(flat__in=flats.values_list('id', flat=True))
+        flats = serializers.serialize("json", flats)
+        personal_accounts = serializers.serialize("json", personal_accounts)
+        context = {
+            "flats": flats,
+            "personal_account": personal_accounts,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetFlatsForMail(View):
+    def get(self, request, section_id, floor_id):
+        flats = Flat.objects.all()
+        if self.kwargs['section_id'] != None:
+            flats = flats.filter(section__id=self.kwargs['section_id'])
+        if self.kwargs['floor_id'] != None:
+            flats = flats.filter(floor__id=self.kwargs['floor_id'])
+
+        flats = serializers.serialize("json", flats)
+        context = {
+            "flats": flats,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetFlatInfoView(StaffRequiredMixin, View):
+    def get(self, request, pk):
+        data = {}
+        flat = Flat.objects.get(pk=pk)
+        try:
+            flat_owner_obj = FlatOwner.objects.get(flat=flat)
+            flat_owner = serializers.serialize('json', [flat_owner_obj])
+            data['flat_owner'] = flat_owner
+            user = CustomUser.objects.get(client=flat_owner_obj)
+            user = serializers.serialize('json', [user])
+            data['user'] = user
+        except ObjectDoesNotExist:
+            pass
+        try:
+            if flat.personal_account is not None:
+                personal_account = flat.personal_account
+                personal_account = serializers.serialize('json', [personal_account])
+                data['personal_account'] = personal_account
+        except ObjectDoesNotExist:
+            pass
+        try:
+            if flat.tariff is not None:
+                tariff = TariffSystem.objects.get(pk=flat.tariff.pk)
+                tariff = serializers.serialize('json', [tariff])
+                data['tariff'] = tariff
+        except ObjectDoesNotExist:
+            pass
+        return JsonResponse(data, safe=False)
+
+
+class GetTariffInfoView(StaffRequiredMixin, View):
+    def get(self, request, pk):
+        tariff = TariffSystem.objects.prefetch_related('tariffservice_set').get(pk=pk)
+        tariff_service = serializers.serialize('json', tariff.tariffservice_set.all())
+        context = {
+            "tariff_services": tariff_service,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetServiceInfoView(StaffRequiredMixin, View):
+    def get(self, request, pk):
+        service = Service.objects.get(pk=pk)
+        service = serializers.serialize('json', [service])
+        context = {
+            "service": service,
+        }
+        return JsonResponse(context, safe=False)
+
+
+class GetIndicationInfoView(StaffRequiredMixin, View):
+    def get(self, request, flat_id, service_id):
+        indication = Indication.objects.filter(flat_id=flat_id, service_id=service_id)
+        if indication.count() != 0:
+            indication = serializers.serialize('json', indication)
+            context = {
+                "indication": indication,
+            }
+        else:
+            return JsonResponse({}, safe=False)
         return JsonResponse(context, safe=False)

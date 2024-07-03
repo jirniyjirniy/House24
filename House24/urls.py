@@ -24,6 +24,7 @@ from django.urls import include, path
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("admin-panel/", include("src.admin_panel.urls")),
+    path("cabinet/", include("src.cabinet.urls")),
     path("login/", include("src.accounts.urls")),
     path("summernote/", include("django_summernote.urls")),
     path("__debug__/", include("debug_toolbar.urls")),

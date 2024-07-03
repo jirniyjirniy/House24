@@ -54,7 +54,7 @@ class IndicationsFilteredList(StaffRequiredMixin, ListView):
         return indications
 
 
-class CounterIndicationsFilteredList(StaffRequiredMixin, ListView):
+class CounterFilteredList(StaffRequiredMixin, ListView):
     template_name = "indication/indications.html"
     context_object_name = "indication"
     paginate_by = 20
@@ -115,19 +115,66 @@ class CounterIndicationsList(StaffRequiredMixin, ListView):
 
 class FlatIndicationsList(StaffRequiredMixin, ListView):
     template_name = "indication/counter_indications_list.html"
-    context_object_name = "indication"
+    context_object_name = "indications"
     paginate_by = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         flat = Flat.objects.get(pk=self.kwargs["flat"])
         context["flat"] = flat
-        context["filter_form"] = CounterIndicationsFilterForm(initial=flat.number)
+        context["filter_form"] = CounterIndicationsFilterForm(initial={
+            'flat': flat.number
+        })
         return context
 
     def get_queryset(self):
         queryset = Indication.objects.filter(flat_id=self.kwargs["flat"])
         return queryset
+
+
+class CounterIndicationsFilteredList(StaffRequiredMixin, ListView):
+    template_name = 'indication/counter_indications_list.html'
+    context_object_name = 'indications'
+    paginate_by = 20
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['flat'] = Flat.objects.get(pk=self.kwargs['flat'])
+        context['filter_form'] = CounterIndicationsFilterForm(initial=self.request.GET)
+        return context
+
+    def get_queryset(self):
+        indications = Indication.objects.filter(flat_id=self.kwargs['flat'])
+        form_filter = CounterIndicationsFilterForm(self.request.GET)
+        qs = []
+        if form_filter.is_valid():
+            if form_filter.cleaned_data['house']:
+                qs.append(Q(flat__house_id=form_filter.cleaned_data['house'].id))
+            if form_filter.cleaned_data['section']:
+                qs.append(Q(flat__section_id=form_filter.cleaned_data['section'].id))
+            if form_filter.cleaned_data['service']:
+                qs.append(Q(service_id=form_filter.cleaned_data['service'].id))
+            if form_filter.cleaned_data['number']:
+                qs.append(Q(number__icontains=form_filter.cleaned_data['number']))
+            if form_filter.cleaned_data['daterange']:
+                date_start, date_end = str(form_filter.cleaned_data['daterange']).split(' - ')
+                date_start = date_start.split('/')
+                date_end = date_end.split('/')
+                date_start.reverse()
+                date_end.reverse()
+                date_start = "-".join(date_start)
+                date_end = "-".join(date_end)
+                qs.append(Q(
+                    Q(date_published__gte=date_start) &
+                    Q(date_published__lte=date_end)
+                ))
+            if form_filter.cleaned_data['status']:
+                qs.append(Q(status=form_filter.cleaned_data['status']))
+            q = Q()
+            for item in qs:
+                q = q & item
+            indications = Indication.objects.filter(flat_id=self.kwargs['flat']).filter(q)
+        return indications
 
 
 class IndicationDetail(StaffRequiredMixin, DetailView):
@@ -216,7 +263,7 @@ class CreateNewIndication(StaffRequiredMixin, CreateView):
                 }
                 return render(request, "indication/indication_form.html", context)
             else:
-                url = reverse("counter_indications", args=[obj.flat.id, obj.service.id])
+                url = reverse("counter_indicators", args=[obj.flat.id, obj.service.id])
                 return redirect(url)
         else:
             context = {"form": form, "create_new_indication": True}

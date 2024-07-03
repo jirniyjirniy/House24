@@ -16,7 +16,7 @@
           href="{% static '/plugins/select2/css/select2.css' %}">
     <link rel="stylesheet"
           type="text/css"
-          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+          href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
     <link rel="stylesheet"
           href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
     {% block head_2b %}{% endblock %}
@@ -34,7 +34,15 @@
             <hr style="border-top: 1px solid darkgrey;">
             <div class="row mb-3">
                 <div class="dropdown text-right">
-                    {% block action_list %}{% endblock %}
+                    {% block for_stat %}{% endblock %}
+                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Выберите действие
+                    </button>
+                    <ul class="dropdown-menu">
+                        {% block action_list %}
+                        {% endblock %}
+                    </ul>
                 </div>
                 <!-- ./col -->
             </div>
@@ -70,7 +78,7 @@
             src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
     <script type="application/javascript">
-        $('.clear_button').on('click',function () {
+        $('.clear_button').on('click', function () {
             $('input').each(function () {
                 $(this).val('')
             })
@@ -80,7 +88,7 @@
             $(".select2-simple-service").val('').trigger('change')
             $(".select2").val('').trigger('change')
 
-             $("#filter").trigger('submit')
+            $("#filter").trigger('submit')
 
         })
     </script>

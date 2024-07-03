@@ -1,5 +1,6 @@
 {% extends 'third_base.html' %}
 {% load static %}
+{% load humanize %}
 {# Load the tag library#}
 {% load django_bootstrap5 %}
 {# Load CSS and JavaScript#}
@@ -34,11 +35,11 @@
         </li>
         {% if user_permission.mailbox %}
             <li>
-                <a class="dropdown-item" href="">Отправить сообщение должникам</a>
+                <a class="dropdown-item" href="{% url 'add_debtors_mailbox' %}">Отправить сообщение должникам</a>
             </li>
         {% endif %}
         <li>
-            <a class="dropdown-item" href="">Отправить приглашение</a>
+            <a class="dropdown-item" href="{% url 'send_invitation' %}">Отправить приглашение</a>
         </li>
     </ul>
 {% endblock %}
@@ -95,10 +96,11 @@
                         <td style="cursor: pointer"
                             data-href="{% url 'clients_detail' client.id %}">
                             {% for flat in client.id|get_flat_queryset %}
-                                <a {% if user_permission.flat %} href="{% url 'flats_detail' flat.id %}" {% else %} href="#" {% endif %}>№{{ flat.number }}
+                                <a {% if user_permission.flat %} href="{% url 'flats_detail' flat.id %}" {% else %}
+                                                                 href="#" {% endif %}>№{{ flat.number }}
                                     - {{ flat.house }}</a>,
-                                    <br>
-                                {% endfor %}
+                                <br>
+                            {% endfor %}
                             </td>
                             <td style="cursor: pointer"
                                 data-href="{% url 'clients_detail' client.id %}">{{ client.user.date_joined }}</td>

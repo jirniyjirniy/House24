@@ -50,14 +50,19 @@
                 <h3 class="card-title">Просмотр квартиры</h3>
                 <div class="">
                     {% if user_permission.paybox %}
-                        <a {% if flat.id|accept_flat_payment is False %} style="opacity: 0.5;cursor: not-allowed" class="btn btn-default mb-3 mb-sm-0 dsbld accept_payment" href="#!" {% else %} href="{% url 'flat_accept_payment' flat.id %}" class="btn btn-default mb-3 mb-sm-0 accept_payment" {% endif %}><i class="fa fa-dollar pe-2"></i>Принять платёж</a>
+                        <a {% if flat.id|accept_flat_payment is False %} style="opacity: 0.5;cursor: not-allowed"
+                                                                         class="btn btn-default mb-3 mb-sm-0 dsbld accept_payment"
+                                                                         href="#" {% else %} href=""
+                                                                         class="btn btn-default mb-3 mb-sm-0 accept_payment" {% endif %}><i
+                                class="fa fa-dollar pe-2"></i>Принять платёж</a>
                     {% endif %}
                     {% if user_permission.receipt %}
-                        <a class="btn btn-default mb-3 mb-sm-0" href=""><i class="fa fa-files-o pe-2"></i>Оформить квитанцию</a>
+                        <a class="btn btn-default mb-3 mb-sm-0" href=""><i class="fa fa-files-o pe-2"></i>Оформить
+                            квитанцию</a>
                     {% endif %}
                     <a class="btn btn-primary mb-3 mb-sm-0"
                        href="{% url 'flats_update' flat.id %}">Редактировать
-                    квартиру</a>
+                        квартиру</a>
                 </div>
             </div>
             <!-- /.card-header -->
@@ -66,82 +71,87 @@
                     <div class="col-12">
                         <table class="table table-bordered table-striped table-view">
                             <tbody>
-                                <tr>
-                                    <td class="font-weight-bold">Лицевой счет</td>
-                                    <td>
-                                        {% if flat.personal_account == '' or flat.personal_account is None %}
-                                            не указано
-                                        {% else %}
-                                            <a {% if user_permission.personal_account %} href="" {% else %} href="#" {% endif %}>{{ flat.personal_account }}</a>
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Номер квартиры</td>
-                                    <td>{{ flat.number }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Площадь</td>
-                                    {% if flat.square is None %}
-                                        <td>не указано</td>
+                            <tr>
+                                <td class="font-weight-bold">Лицевой счет</td>
+                                <td>
+                                    {% if flat.personal_account == '' or flat.personal_account is None %}
+                                        не указано
                                     {% else %}
-                                        <td>
-                                            {{ flat.square }} м<sup>2</sup>
-                                        </td>
+                                        <a {% if user_permission.personal_account %} href="" {% else %}
+                                                                                     href="#" {% endif %}>{{ flat.personal_account }}</a>
                                     {% endif %}
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Дом</td>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Номер квартиры</td>
+                                <td>{{ flat.number }}</td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Площадь</td>
+                                {% if flat.square is None %}
+                                    <td>не указано</td>
+                                {% else %}
                                     <td>
-                                        <a {% if user_permission.house %} href="{% url 'house_detail' flat.house.id %}" {% else %} href="#!" {% endif %}>{{ flat.house }}</a>
+                                        {{ flat.square }} м<sup>2</sup>
                                     </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Секция</td>
-                                    <td>
-                                        {% if flat.section is None %}
-                                            не указано
-                                        {% else %}
-                                            {{ flat.section }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Этаж</td>
-                                    <td>
-                                        {% if flat.floor is None %}
-                                            не указано
-                                        {% else %}
-                                            {{ flat.floor }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Владелец</td>
-                                    <td>
-                                        {% if flat.flat_owner %}
-                                            <a {% if user_permission.flat_owner %} href="{% url 'clients_detail' flat.flat_owner.id %}" {% else %} href="#" {% endif %}>{{ flat.flat_owner.user.email }}</a>
-                                        {% else %}
-                                            не указано
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="font-weight-bold">Тариф</td>
-                                    <td>
-                                        {% if flat.tariff is None %}
-                                            не указано
-                                        {% else %}
-                                            {{ flat.tariff }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
+                                {% endif %}
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Дом</td>
+                                <td>
+                                    <a {% if user_permission.house %}
+                                        href="{% url 'house_detail' flat.house.id %}" {% else %}
+                                        href="#!" {% endif %}>{{ flat.house }}</a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Секция</td>
+                                <td>
+                                    {% if flat.section is None %}
+                                        не указано
+                                    {% else %}
+                                        {{ flat.section }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Этаж</td>
+                                <td>
+                                    {% if flat.floor is None %}
+                                        не указано
+                                    {% else %}
+                                        {{ flat.floor }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Владелец</td>
+                                <td>
+                                    {% if flat.flat_owner %}
+                                        <a {% if user_permission.flat_owner %}
+                                            href="{% url 'clients_detail' flat.flat_owner.id %}" {% else %}
+                                            href="#" {% endif %}>{{ flat.flat_owner.user.email }}</a>
+                                    {% else %}
+                                        не указано
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Тариф</td>
+                                <td>
+                                    {% if flat.tariff is None %}
+                                        не указано
+                                    {% else %}
+                                        {{ flat.tariff }}
+                                    {% endif %}
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                         <div>
                             {% if user_permission.indication %}
                                 <p>
-                                    <a href="">Посмотреть показания счетчиков</a>
+                                    <a href="{% url 'flat_indication' flat.id %}">Посмотреть показания счетчиков</a>
                                 </p>
                             {% endif %}
                             {% if user_permission.paybox %}
