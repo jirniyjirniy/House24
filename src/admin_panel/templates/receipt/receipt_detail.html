@@ -1,0 +1,256 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Квитанция
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% load check_email %}
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Квитанция</h4>
+                </div>
+
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right" style="font-size: 15px">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item"><a href="{% url 'statistic' %}">Главная</a></li>
+                        {% else %}
+                        {% endif %}
+                        <li class="breadcrumb-item"><a href="{% url 'receipts' %}">Квитанции</a></li>
+                        <li class="breadcrumb-item active">Квитанция №{{ receipt.number }}</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row ps-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                    <div class="d-flex">
+                        <div class=" d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                             style="height: 38px;border: 1px solid #ced4da">
+                            №
+                        </div>
+                        <div class="">
+                            <div class="mb-3"><input type="text" name="number" value="{{ receipt.number }}"
+                                                     class="form-control publishing-date rounded-0 shadow-none flatpickr-input bg-white"
+                                                     placeholder="" required="" id="id_number" readonly="readonly">
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="ps-2 pb-3 pe-2"><span>от</span></div>
+                    <div class="d-flex">
+                        <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                             style="height: 38px;border: 1px solid #ced4da">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div class="mb-3"><input type="text" name="date_published"
+                                                 value="{{ receipt.date_published }}"
+                                                 class="form-control publishing-date rounded-0 shadow-none flatpickr-input bg-white"
+                                                 placeholder="" required="" id="id_date_published"
+                                                 readonly="readonly"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            <div class="card-header">
+                <div class="d-flex justify-content-between flex-wrap">
+                    <h5 class="me-1">Просмотр квитанции</h5>
+                    <div class="text-right d-flex flex-wrap">
+                        <a class="btn btn-default me-1 mb-1" href="{% url 'receipt_print' receipt.id %}">Печать</a>
+                        <a {% if receipt.id|accept_email is False %} style="opacity: 0.5;cursor: not-allowed"
+                                                                     class="btn btn-default me-1 mb-1 accept_email dsbld"
+                                                                     href="#" {% else %}
+                                                                     class="btn btn-default me-1 mb-1 accept_email"
+                                                                     href="{% url 'send_receipt_email' receipt.id %}" {% endif %}>Отправить
+                            на e-mail</a>
+                        <a class="btn btn-primary me-1 mb-1" href="{% url 'update_receipt' receipt.id %}">Редактировать
+                            квитанцию</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <div class="col-12">
+                    <table class="table table-bordered table-striped table-view">
+                        <tbody>
+                        <tr>
+                            <td class="font-weight-bold">Проведена</td>
+                            <td>
+                                {% if receipt.is_complete %}
+                                    <span class="badge text-bg-success text-white">Проведена</span>
+                                {% else %}
+                                    <span class="badge text-bg-danger text-white">Не проведена</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Статус</td>
+                            <td>
+                                {% if receipt.get_status_display == 'Оплачена' %}
+                                    <span class="badge text-bg-success text-white">Оплачена</span>
+                                {% elif receipt.get_status_display == 'Частично оплачена' %}
+                                    <span class="badge text-bg-warning text-white">Частично оплачена</span>
+                                {% elif receipt.get_status_display == 'Не оплачена' %}
+                                    <span class="badge text-bg-danger text-white">Не оплачена</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Период</td>
+                            <td>{{ receipt.start_date }} - {{ receipt.end_date }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Владелец</td>
+                            <td>
+                                {% if receipt.flat.flat_owner is None %}
+                                    не указано
+                                {% else %}
+                                    <a href="/admin/clients/detail/{{ receipt.flat.flat_owner.id }}">{{ receipt.flat.flat_owner }}</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Лицевой счет</td>
+                            <td>
+                                {% if receipt.flat.personal_account is None or receipt.flat.personal_account == '' %}
+                                    не указано
+                                {% else %}
+                                    <a href="{% url 'personal_account_detail' receipt.flat.personal_account.id %}">{{ receipt.flat.personal_account }}</a>
+
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Телефон</td>
+                            <td>
+                                {% if receipt.flat.flat_owner is None %}
+                                    не указано
+                                {% else %}
+                                    {{ receipt.flat.flat_owner.user.phone }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Дом</td>
+                            <td>
+                                <a href="{% url 'house_detail' receipt.flat.house.id %}">{{ receipt.flat.house }}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Квартира</td>
+                            <td>
+                                <a href="{% url 'flats_detail' receipt.flat.id %}">{{ receipt.flat.number }}</a>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Секция</td>
+                            <td>
+                                {% if receipt.flat.section is None or receipt.flat.section == '' %}
+                                    не указано
+                                {% else %}
+                                    {{ receipt.flat.section }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-weight-bold">Тариф</td>
+                            <td>
+                                <a href="{% url 'tariff_detail' receipt.tariff.id %}">{{ receipt.tariff.title }}</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th style="min-width: 40px;">#</th>
+                            <th style="min-width: 200px;">Услуга</th>
+                            <th style="min-width: 150px;">Количество потребления (расход)</th>
+                            <th style="min-width: 130px;">Ед. изм.</th>
+                            <th style="min-width: 150px;">Цена за ед., грн</th>
+                            <th style="min-width: 150px;">Стоимость, грн</th>
+                        </tr>
+                        </thead>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5"></td>
+                            <td colspan="2"><b>Итого: <span id="price-total">???</span></b></td>
+                        </tr>
+                        </tfoot>
+                        <tbody id="form-receiptservice-rows">
+                        {% for receipt_service in receipt_services %}
+                            <tr role="row">
+                                <td>{{ forloop.counter }}</td>
+                                <td>{{ receipt_service.service.title }}</td>
+                                <td class="consumption" data-consumption="{{ receipt_service.consumption }}"></td>
+                                <td>{{ receipt_service.measure.title }}</td>
+                                <td class="unit_price" data-unit_price="{{ receipt_service.unit_price }}"></td>
+                                <td class="total_service_price"></td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3">
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+    <script>
+        let total_price = 0
+        $('#form-receiptservice-rows').children().each(function () {
+            let unit_price = $(this).find('.unit_price')
+            let consumption = $(this).find('.consumption')
+
+            consumption.data('consumption', consumption.data('consumption').replace(/,/g, "."));
+            unit_price.data('unit_price', unit_price.data('unit_price').replace(/,/g, "."));
+            consumption.text(consumption.data('consumption'))
+            unit_price.text(unit_price.data('unit_price'))
+            let total_service_price = $(this).find('.total_service_price')
+            if (Number(unit_price.text()) && Number(consumption.text())) {
+                $(total_service_price).text(Number(Number(unit_price.text()).toFixed(2) * Number(consumption.text()).toFixed(2)).toFixed(2))
+                total_price = total_price + Number($(total_service_price).text())
+                $('#price-total').text(Number(total_price).toFixed(2))
+            }
+        })
+        $('body').on('click', '.accept_email', function () {
+            if ($(this).hasClass('dsbld')) {
+                alert('У квартиры на которую оформлена квитанция нету владельца. Поэтому отправка на почту невозможна')
+            } else {
+            }
+
+
+        })
+
+    </script>
+{% endblock %}

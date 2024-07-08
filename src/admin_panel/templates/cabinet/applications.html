@@ -1,0 +1,141 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Вызов мастера
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static '/plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_panel/application/application.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+{% endblock %}
+
+
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Вызов мастера</h4>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Главная</a></li>
+                            <li class="breadcrumb-item active">Вызов мастера</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+                <div class="row mb-3">
+                    <div class="dropdown text-right">
+                        <a class="btn btn-success" href="{% url 'add_application_cabinet' %}">Создать заявку</a>
+                    </div>
+                    <!-- ./col -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="card card-success card-outline">
+                <!-- /.card-header -->
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table id="application" class="table border-0 table-bordered table-hover  linkedRow w-100">
+                            <thead>
+                            <tr>
+                                <th>№ заявки</th>
+                                <th>Тип мастера</th>
+                                <th>Описание</th>
+                                <th>Удобное время</th>
+                                <th>Статус</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for application in applications %}
+                                <tr class="border-0 row_elem">
+                                    <td>{{ application.id }}</td>
+                                    <td>
+                                        {{ application.get_user_type_display }}
+                                    </td>
+                                    <td>
+                                        {{ application.description }}
+                                    </td>
+                                    <td>{{ application.date_published|date:"d.m.Y" }}
+                                        - {{ application.time_published }}</td>
+                                    <td>
+                                        {% if application.get_status_display == 'Новое' %}
+                                            <span class="badge text-bg-primary text-white">Новое</span>
+                                        {% elif application.get_status_display == 'Выполнено' %}
+                                            <span class="badge text-bg-success text-white">Выполнено</span>
+                                        {% elif application.get_status_display == 'В работе' %}
+                                            <span class="badge text-bg-warning text-white">В работе</span>
+                                        {% else %}
+                                            {{ application.get_status_display }}
+                                        {% endif %}
+                                    </td>
+                                    <td class="ps-1 pe-1 text-center">
+                                        <div class="btn-group">
+                                            <button class="btn btn-default delete-confirmation"
+                                                    data-target="{{ application.id }}" role="button"><i
+                                                    class="fa-solid fa-trash-can"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer d-flex flex-column bg-white">
+                    <div class="d-inline-flex justify-content-end">
+                        {% bootstrap_pagination page_obj size='sm' %}
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+{% endblock %}
+
+
+
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(".delete-confirmation").on('click', function () {
+
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                let tr_elem = $(this).parents('.row_elem')
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/cabinet/application/delete/${$(this).data('target')}`,         /* Куда отправить запрос */
+                    method: 'post',             /* Метод запроса (post или get) */
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                        tr_elem.remove()
+                    }
+                });
+            }
+        });
+
+    </script>
+{% endblock %}

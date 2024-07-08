@@ -82,7 +82,10 @@ from .views.website import (
     SiteServicesView,
     TariffSiteView,
 )
-from ..cabinet.views import CabinetStatisticView
+from ..cabinet.views import CabinetStatisticView, Profile, UpdateProfileView, ReceiptListCabinet, FlatReceiptList, \
+    FlatReceiptFilteredList, CabinetReceiptsFilteredList, CabinetReceiptDetail, Invoice, ReceiptPDF, ReceiptPDF2, \
+    CabinetTariffDetail, CabinetMailboxList, CabinetMailboxFilteredList, CabinetMailboxDetail, CabinetDeleteMailbox, \
+    CabinetApplicationList, CabinetCreateApplication
 
 urlpatterns = [
     path("services/", ServicesView.as_view(), name="services"),
@@ -219,7 +222,31 @@ urlpatterns = [
     path("receipts/send_receipt_email/<str:receipt_id>", SendReceiptEmail.as_view(),
          name='send_receipt_email'),
 
+    path('cabinet/statistic/<int:flat_id>/', CabinetStatisticView.as_view(), name='flat_statistic_cabinet'),
 
-    path('cabinet/statistic/<int:flat_id>/', CabinetStatisticView.as_view(), name='cabinet_statistic'),
+    path('cabinet/profile/', Profile.as_view(), name='profile'),
+    path('cabinet/profile/update/<str:pk>/', UpdateProfileView.as_view(), name='update_profile'),
 
+    path('cabinet/receipts/', ReceiptListCabinet.as_view(), name='receipts_cabinet'),
+    path("cabinet/flat_receipts/<str:flat_id>", FlatReceiptList.as_view(), name='get_flat_receipts_cabinet'),
+    path("cabinet/flat_filtered_receipts/<str:flat_id>", FlatReceiptFilteredList.as_view(),
+         name='flat_filtered_receipts_cabinet'),
+    path("cabinet/filtered_receipts", CabinetReceiptsFilteredList.as_view(),
+         name='filtered_receipts_cabinet'),
+    path('cabinet/receipt/detail/<int:pk>/', CabinetReceiptDetail.as_view(), name='read_receipt_cabinet'),
+    path("cabinet/receipt_to_pdf_print/<str:receipt_id>", ReceiptPDF.as_view(), name='receipt_to_pdf_print'),
+    path("cabinet/receipt_to_pdf2/<str:receipt_id>", ReceiptPDF2.as_view(), name='receipt_to_pdf2'),
+
+    path('cabinet/invoice/', Invoice.as_view(), name='invoice'),
+    path("cabinet/tariff/detail/<str:flat_id>", CabinetTariffDetail.as_view(), name='get_tariff_cabinet'),
+
+    path("cabinet/mailbox", CabinetMailboxList.as_view(), name='mailboxes_cabinet'),
+    path("cabinet/filtered_messages", CabinetMailboxFilteredList.as_view(),
+         name='filtered_messages_cabinet'),
+    path("cabinet/mailbox/detail/<str:pk>", CabinetMailboxDetail.as_view(), name='mailbox_detail_cabinet'),
+    path("cabinet/mailbox/delete/<str:pk>", CabinetDeleteMailbox.as_view(),
+         name='delete_mailbox_cabinet'),
+
+    path("cabinet/applications", CabinetApplicationList.as_view(), name='applications_cabinet'),
+    path("cabinet/application/add", CabinetCreateApplication.as_view(), name='add_application_cabinet'),
 ]

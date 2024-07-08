@@ -1,0 +1,212 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{# Read the documentation for more information #}
+{% block title %}
+    Профиль
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+
+    <div class="content-wrapper" style="position: relative;height: auto">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Профиль</h4>
+                    </div>
+                    <div class="col-sm-6">
+                    </div>
+                </div>
+            </div><!-- /.container-fluid -->
+            <hr style="border-top: 1px solid darkgrey;">
+
+        </section>
+
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-3">
+
+                        <!-- Profile Image -->
+                        <div class="card card-success card-outline">
+                            <div class="card-body box-profile">
+                                <div class="text-center">
+                                    {% if request.user.avatar.url is None %}
+                                        <img class="img-circle pull-left img-responsive"
+                                             style="width: 160px;height: 160px;object-fit: cover"
+                                             src="{% static 'admin_panel/imgs/placeholder.jpeg' %}" alt="">
+                                    {% else %}
+                                        <img class="img-circle pull-left img-responsive"
+                                             style="width: 100px;height: 100px;object-fit: cover"
+                                             src="{{ request.user.avatar.url }}" alt="">
+                                    {% endif %}
+                                </div>
+                                <h3 class="profile-username text-center">{{ request.user.last_name }}&nbsp;{{ request.user.first_name }}</h3>
+                                <p class="text-muted text-center">Владелец квартиры</p>
+                                <ul class="list-group list-group-unbordered mb-3">
+                                    <li class="list-group-item">
+                                        <b>Телефон</b> <a class="float-right">{{ request.user.phone }}</a>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>Телеграмм</b> <a class="float-right">{{ request.user.client.telegram }}</a>
+                                    </li>
+                                    <li class="list-group-item">
+                                        <b>Вайбер</b> <a class="float-right">{{ request.user.client.viber }}</a>
+                                    </li>
+                                </ul>
+
+                                <a href="{% url 'update_profile' request.user.id %}"
+                                   class="btn btn-primary btn-block"><b>Изменить</b></a>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+
+                        <!-- About Me Box -->
+                        <div class="card card-success">
+                            <div class="card-header">
+                                <h3 class="card-title">Обо мне</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <p class="text-muted">
+                                    {{ request.user.client.bio }}
+                                </p>
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                    </div>
+                    <!-- /.col -->
+                    <div class="col-md-9">
+                        <h4>Мои квартиры</h4>
+                        <hr style="border-top: 1px solid darkgrey;">
+                        {% for flat in flats %}
+                            <div class="card card-success card-outline">
+                                <div class="card-header p-2">
+                                    <h5>Описание квартиры</h5>
+                                </div><!-- /.card-header -->
+                                <div class="card-body">
+                                    <p>{{ flat.house }}. {{ flat.house.address }}, кв.{{ flat.number }}</p>
+                                    <div class="row">
+                                        {% for gallery in flat.house.gallery.photo_set.all %}
+                                            {% if forloop.first %}
+                                                {% if gallery.img is None %}
+                                                    <div class="col-12 col-md-6 mb-3 mb-md-0 text-center ">
+                                                        <img src="{% static 'admin_panel/imgs/placeholder.jpeg' %}"
+                                                             class="img-fluid"
+                                                             style="min-height: 350px;object-fit: cover;"
+                                                             alt="Изображение #1. Размер: (522x350)">
+                                                    </div>
+                                                {% else %}
+                                                    <div class="col-12 col-md-6 mb-3 mb-md-0 text-center">
+                                                        <img src="{{ gallery.img.url }}" class="img-fluid"
+                                                             style="min-height: 350px;object-fit: cover;"
+                                                             alt="Изображение #1. Размер: (522x350)">
+                                                    </div>
+
+                                                {% endif %}
+                                                <div class="col-12 col-md-6 row d-flex align-content-between">
+                                            {% else %}
+                                                {% if gallery.img is None or gallery.img == '' %}
+                                                    <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center pe-0">
+                                                        <img src="{% static 'admin_panel/imgs/placeholder.jpeg' %}"
+                                                             class="img-fluid"
+                                                             style="min-height: 160px;object-fit: cover;"
+                                                             alt="Изображение #2. Размер: (248x160)">
+                                                    </div>
+                                                {% else %}
+                                                    <div class="col-12 col-sm-6 mb-3 mb-md-0 text-center pe-0">
+                                                        <img src="{{ gallery.img.url }}" class="img-fluid"
+                                                             style="min-height: 160px;object-fit: cover;"
+                                                             alt="Изображение #2. Размер: (248x160)">
+                                                    </div>
+                                                {% endif %}
+                                            {% endif %}
+
+                                        {% endfor %}
+                                        </div>
+                                        <div class="table-responsive mt-3 col-12">
+                                            <table class="table table-bordered table-striped">
+                                                <thead>
+                                                <tr>
+                                                    <th colspan="2">Описание</th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr>
+                                                    <th style="min-width: 200px; font-weight:normal;">Название дома</th>
+                                                    <th style="font-weight:normal;">{{ flat.house }}</th>
+                                                </tr>
+                                                <tr>
+                                                    <td>Адрес</td>
+                                                    <td>{{ flat.house.address }}, {{ flat.number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>№ квартиры</td>
+                                                    <td>{{ flat.number }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Площадь</td>
+                                                    <td>
+                                                        {% if flat.square is None %}
+                                                            не указано
+                                                        {% else %}
+                                                            {{ flat.square }}м<sup>2</sup>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Этаж</td>
+                                                    <td>
+                                                        {% if flat.floor is None %}
+                                                            не указано
+                                                        {% else %}
+                                                            {{ flat.floor }}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Секция</td>
+                                                    <td>
+                                                        {% if flat.section is None %}
+                                                            не указано
+                                                        {% else %}
+                                                            {{ flat.section }}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>Лицевой счет</td>
+                                                    <td>
+                                                        {% if flat.personal_account is None or flat.personal_account == '' %}
+                                                            не указано
+                                                        {% else %}
+                                                            {{ flat.personal_account }}
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div><!-- /.card-body -->
+                                </div><!-- /.card -->
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div><!-- /.container-fluid -->
+            </div><!-- /.container-fluid -->
+        </section>
+    </div>
+{% endblock %}

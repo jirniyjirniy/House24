@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Заявка №{{ application.id }}
+{% endblock %}
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Заявка №{{ application.id }}</h4>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right" style="font-size: 12px">
+                            {% if user_permission.statistics %}
+                                <li class="breadcrumb-item"><a href="{% url 'roles' %}">Главная</a></li>
+                            {% else %}
+                                <li class="breadcrumb-item"><a href="{% url 'personal_update' request.user.id %}">Главная</a>
+                                </li>
+                            {% endif %}
+                            <li class="breadcrumb-item"><a href="{% url 'applications' %}">Заявки вызова мастера</a>
+                            </li>
+                            <li class="breadcrumb-item active">Заявка №{{ application.id }}</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row ps-2">
+                <div class="col-12">
+                    <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                        <div class="d-flex">
+                            <div class="mb-3"><input type="text" name="date_published"
+                                                     value="{{ application.date_published }}"
+                                                     class="form-control publishing-date rounded-0 shadow-none flatpickr-input bg-white"
+                                                     placeholder="" required="" id="id_date_published"
+                                                     readonly="readonly"></div>
+                            <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                        </div>
+                        <div class="ps-2 pb-3 pe-2"><span>от</span></div>
+                        <div class="d-flex">
+                            <div class="mb-3"><input type="text" name="time_published"
+                                                     value="{{ application.time_published }}"
+                                                     class="form-control publishing-time rounded-0 shadow-none flatpickr-input bg-white"
+                                                     placeholder="" required="" id="id_time_published"
+                                                     readonly="readonly"></div>
+                            <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                <i class="fa-regular fa-clock fa-flip-horizontal"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Default box -->
+            <div class="card card-success card-outline">
+                <div class="card-header text-right">
+                    <a class="btn btn-primary" href="{% url 'applications_update' application.id %}">Редактировать
+                        заявку</a>
+                </div>
+
+                <!-- /.card-header -->
+                <div class="card-body p-3">
+                    <div class="col-12 col-md-8 ">
+                        <table class="table table-bordered table-striped table-view">
+                            <tbody>
+                            <tr>
+                                <td>Статус</td>
+                                <td>
+                                    {% if application.get_status_display == 'Новое' %}
+                                        <span class="badge text-bg-primary text-white">Новое</span>
+                                    {% elif application.get_status_display == 'Выполнено' %}
+                                        <span class="badge text-bg-success text-white">Выполнено</span>
+                                    {% elif application.get_status_display == 'В работе' %}
+                                        <span class="badge text-bg-warning text-white">В работе</span>
+                                    {% else %}
+                                        {{ application.get_status_display }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Владелец</td>
+                                <td>
+                                    {% if application.flat.flat_owner is None %}
+                                        (не указано)
+                                    {% else %}
+                                        <a {% if user_permission.flat_owner %}
+                                            href="{% url 'clients_detail' application.flat.flat_owner.id %}" {% else %}
+                                            href="#" {% endif %}>
+                                            {{ application.flat.flat_owner }}
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Телефон</td>
+                                <td>
+                                    {% if application.flat.flat_owner is None %}
+                                        (не указано)
+                                    {% else %}
+                                        {{ application.flat.flat_owner.user.phone }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Квартира</td>
+                                <td>
+                                    <a {% if user_permission.flat %}
+                                        href="{% url 'flats_detail' application.flat.id %}" {% else %}
+                                        href="#" {% endif %} >
+                                        {{ application.flat.number }}, {{ application.flat.house }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Тип мастера</td>
+                                <td>
+                                    {% if application.user_type is None %}
+                                        не указано
+                                    {% else %}
+                                        {{ application.get_user_type_display }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Мастер</td>
+                                <td>
+                                    {% if application.user is None %}
+                                        (не указано)
+                                    {% else %}
+                                        <a {% if user_permission.users %}
+                                            href="{% url 'personal_detail' application.user.id %}" {% else %}
+                                            href="#" {% endif %}>
+                                            {{ application.user }} ({{ application.user.get_role_display }})
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Описание</td>
+                                <td>{{ application.description }}</td>
+                            </tr>
+                            <tr>
+                                <td>Добавлено</td>
+                                <td>{{ application.date_published }} - {{ application.time_published }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer p-3">
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+
+{% endblock %}

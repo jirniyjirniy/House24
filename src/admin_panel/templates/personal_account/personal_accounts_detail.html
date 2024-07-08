@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% load check_personal_account %}
+{% load check_relation %}
+
+{% block title %}
+    Лицевой счёт
+{% endblock %}
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Лицевой счет</h4>
+                </div>
+
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right" style="font-size: 15px">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item"><a href="{% url 'roles' %}">Главная</a></li>
+                        {% else %}
+                            <li class="breadcrumb-item"><a
+                                    href="{% url 'personal_update' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item"><a href="{% url 'personal_accounts' %}">Лицевые счета</a></li>
+                        <li class="breadcrumb-item active">Лицевой счет №{{ personal_account.number }}</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row ps-2">
+            <div class="col-12">
+                <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                    <div class="d-flex">
+                        <div class=" d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                             style="height: 38px;border: 1px solid #ced4da">
+                            №
+                        </div>
+                        <div class="">
+                            <div class="mb-3">
+                                <input type="text" name="number"
+                                       class="form-control number rounded-0 shadow-none bg-white" placeholder=""
+                                       readonly="readonly" required="" id="id_number"
+                                       value="{{ personal_account.number }}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Default box -->
+        <div class="card card-success card-outline">
+            {#                <div class="card-header text-right">#}
+            {#                    {% if user_permission.paybox %}#}
+            {#                        <a {% if personal_account.id|accept_payment is False %} style="opacity: 0.5;cursor: not-allowed"#}
+            {#                                                                                class="btn btn-default mb-3 mb-sm-0 dsbld accept_payment"#}
+            {#                                                                                href="#!" {% else %}#}
+            {#                                                                                href="{% url 'personal_account_accept_payment' personal_account.id %}"#}
+            {#                                                                                class="btn btn-default mb-3 mb-sm-0 accept_payment" {% endif %}><i#}
+            {#                                class="fa fa-dollar pe-2"></i>Принять платёж</a>#}
+            {#                    {% endif %}#}
+            {#                    {% if user_permission.receipt %}#}
+            {#                        <a {% if personal_account.id|accept_payment is False %} style="opacity: 0.5;cursor: not-allowed"#}
+            {#                                                                                class="btn btn-default mb-3 mb-sm-0 dsbld accept_payment"#}
+            {#                                                                                href="#!" {% else %}#}
+            {#                                                                                class="btn btn-default mb-3 mb-sm-0 accept_payment"#}
+            {#                                                                                href="{% url 'personal_account_accept_receipt' personal_account.id %}" {% endif %}><i#}
+            {#                                class="fa fa-files-o pe-2"></i>Оформить квитанцию</a>#}
+            {#                    {% endif %}#}
+            {#                    <a class="btn btn-primary" href="{% url 'update_personal_account' personal_account.id %}">Редактировать#}
+            {#                        счёт</a>#}
+            {#                </div>#}
+
+            <!-- /.card-header -->
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table class="table table-bordered table-striped table-view">
+                            <tbody>
+                            <tr>
+                                <td class="font-weight-bold">Статус</td>
+                                <td>
+                                    {% if personal_account.get_status_display == 'Активен' %}
+                                        <span class="badge text-bg-success text-white">Активен</span>
+                                    {% elif personal_account.get_status_display == 'Не активен' %}
+                                        <span class="badge text-bg-danger text-white">Не Активен</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Дом</td>
+                                <td>
+                                    {% if personal_account.house is None %}
+                                        не указано
+                                    {% else %}
+                                        <a {% if user_permission.house %}
+                                            href="{% url 'house_detail' personal_account.house.id %}" {% else %}
+                                            href="#" {% endif %} >{{ personal_account.house }}</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Секция</td>
+                                <td>
+                                    {% if personal_account.section is None %}
+                                        не указано
+                                    {% else %}
+                                        {{ personal_account.section }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Квартира</td>
+                                <td>
+                                    {% if personal_account.flat is None %}
+                                        не указано
+                                    {% else %}
+                                        <a {% if user_permission.flat %}
+                                            href="{% url 'flats_detail' personal_account.flat.id %}" {% else %}
+                                            href="#" {% endif %}>{{ personal_account.flat.number }}</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Владелец</td>
+                                <td>
+                                    {% if personal_account.flat is None or personal_account.flat.flat_owner is None %}
+                                        не указано
+                                    {% else %}
+                                        <a {% if user_permission.flat_owner %}
+                                            href="{% url 'clients_detail' personal_account.flat.flat_owner.id %}" {% else %}
+                                            href="#" {% endif %}>{{ personal_account.flat.flat_owner }}</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="font-weight-bold">Остаток, грн.</td>
+                                <td>
+                                    {% if personal_account.balance >= 1 %}
+                                        <span class="text-success">{{ personal_account.balance }}</span>
+                                    {% elif personal_account.balance == 0 %}
+                                        <span class="text">{{ personal_account.balance }}</span>
+                                    {% else %}
+                                        <span class="text-danger">{{ personal_account.balance }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div>
+                            {% if user_permission.indication %}
+                                {% if personal_account.flat and personal_account.status != 'disabled' %}
+                                    <p><a href="{% url 'flat_indication' personal_account.flat.id %}">Посмотреть
+                                        показания счетчиков</a></p>
+                                {% else %}
+                                    <p><a class="accept_payment dsbld" href="#">Посмотреть показания счетчиков</a>
+                                    </p>
+                                {% endif %}
+                            {% endif %}
+                            {% if user_permission.paybox %}
+                                <p><a href="">Посмотреть
+                                    приходы</a></p>
+                            {% endif %}
+                            {% if user_permission.receipt %}
+                                {% if personal_account.flat and personal_account.status != 'disabled' %}
+                                    <p><a href="">Посмотреть
+                                        квитанции</a></p>
+                                {% else %}
+                                    <p><a class="accept_payment dsbld" href="#">Посмотреть квитанции</a></p>
+                                {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer p-3">
+            </div>
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+    <script type="module" src="{% static 'admin_panel/personal_account/personal_account_detail.js' %}"></script>
+
+{% endblock %}

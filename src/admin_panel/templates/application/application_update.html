@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Заявка
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static 'flatpickr/dist/flatpickr.min.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.css' %}">
+{% endblock %}
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Новая заявка</h4>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        {% if user_permission.statistics %}
+                            <li class="breadcrumb-item"><a href="{% url 'roles' %}">Главная</a></li>
+                        {% else %}
+                            <li class="breadcrumb-item"><a
+                                    href="{% url 'personal_detail' request.user.id %}">Главная</a>
+                            </li>
+                        {% endif %}
+                        <li class="breadcrumb-item"><a href="{% url 'applications' %}">Вызов мастера </a></li>
+                        <li class="breadcrumb-item">Новая заявка</li>
+                    </ol>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div><!-- /.container-fluid -->
+    </section>
+    <!-- Main content -->
+    <section class="content">
+        <form id="application-form" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row ps-2">
+                <div class="col-12">
+                    <div class="d-flex justify-content-center align-items-start flex-column flex-sm-row align-items-sm-center justify-content-sm-start">
+                        <div class="d-flex">
+                            {% bootstrap_field form.date_published %}
+                            <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                <i class="fa-solid fa-calendar-days"></i>
+                            </div>
+                        </div>
+                        <div class="ps-2 pb-3 pe-2"><span>от</span></div>
+                        <div class="d-flex">
+                            {% bootstrap_field form.time_published %}
+                            <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                 style="height: 38px;border: 1px solid #ced4da">
+                                <i class="fa-regular fa-clock fa-flip-horizontal"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Default box -->
+            <div class="card card-primary card-outline card-success ps-3">
+                <div class="card-header p-0 border-bottom-0">
+                </div>
+                <div class="card-body p-2">
+                    <div class="row">
+                        <div class="col-12 col-sm-6 pe-4 ps-0">
+                            {% if form.instance.flat.flat_owner is None %}
+                            {% else %}
+                                <a class="user_link"
+                                   href="{% url 'clients_update' form.instance.flat.flat_owner.user.id %}"
+                                   target="_blank"><i class="fa fa-external-link"></i></a>
+                            {% endif %}
+                            {% bootstrap_field form.flat_owner %}
+                            <p><b>Телефон:</b> <a
+                                    href="tel:{{ form.instance.flat.flat_owner.user.phone }}">{{ form.instance.flat.flat_owner.user.phone }}</a>
+                            </p>
+                        </div>
+                        <div class="col-12 col-sm-6 pe-4">
+                            <p><b>Дом: </b> <a
+                                    href="{% url 'house_update' form.instance.flat.house.id %}">{{ form.instance.flat.house.title }}</a>
+                            </p>
+                            <p><b>Секция: </b> {{ form.instance.flat.section.title }}</p>
+                            <p><b>Этаж: </b> {{ form.instance.flat.floor.title }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-sm-6 pe-4">
+                            {% bootstrap_field form.description %}
+                        </div>
+                        <div class="col-12 col-sm-6">
+                            {% bootstrap_field form.flat %}
+                            {% bootstrap_field form.user_type %}
+                            {% bootstrap_field form.status %}
+                            {% bootstrap_field form.user %}
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% bootstrap_field form.comment %}
+                    </div>
+
+
+                    <div class="col-12 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </div>
+
+            </div>
+        </form>
+
+    </section>
+    <!-- /.content -->
+{% endblock %}
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-ru-RU.min.js"
+            integrity="sha512-uCNUSqDrnthkeMqbxKoePE2CewCjUenOwh3/Fw8shLJ+bBppg6ynadVRVcL5EStFBq2GUKUrAJZgC2qs/Q5z9Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="application/javascript" src="{% static '/flatpickr/dist/flatpickr.js' %}"></script>
+    <script type="application/javascript" src="{% static '/flatpickr/dist/l10n/ru.js' %}"></script>
+
+    <script type="application/javascript">
+        $('.user_link').appendTo("label[for='id_flat_owner']")
+        $('.select2').select2({
+            placeholder: 'Выберите...',
+            allowClear: true,
+        })
+        $('.summernote').summernote({
+            height: 200,
+            lang: 'ru-RU'
+
+        });
+        $(".publishing-date").flatpickr({
+            dateFormat: "d.m.Y",
+            locale: "ru", // locale for this instance only
+        });
+        $(".publishing-time").flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "ru", // locale for this instance only
+        });
+        $('.publishing-date').addClass('bg-white')
+        $(".publishing-time").addClass('bg-white')
+        $("#application-form").validate({
+
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: [],
+            rules: {
+                'description': {
+                    required: true
+                },
+                'flat': {
+                    required: true
+                }
+            },
+            messages: {
+                'description': {
+                    required: "Обязательно укажите описание"
+                },
+                'flat': {
+                    required: "Обязательно укажите квартиру"
+                },
+            },
+            highlight: function (element, errorClass, validClass) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    $("#select2-" + elem.attr("id") + "-container").parent().addClass(errorClass);
+                } else {
+                    elem.addClass(errorClass);
+                }
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    $("#select2-" + elem.attr("id") + "-container").parent().removeClass(errorClass);
+                } else {
+                    elem.removeClass(errorClass);
+                }
+            },
+            errorPlacement: function (error, element) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    element = $("#select2-" + elem.attr("id") + "-container").parent();
+                    error.insertAfter(element);
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
+        $('#application-form').on("change", function (e) {
+            $(this).valid()
+        });
+        $('.select2').select2({
+            placeholder: 'Выберите...',
+            allowClear: true,
+        }).on("change", function (e) {
+            $(this).valid()
+        });
+    </script>
+    <script type="module" src="{% static 'admin_panel/application/application.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,255 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{# Read the documentation for more information #}
+{% block title %}
+    Сводка - {{ flat.house }}, кв.{{ flat.number }}
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+
+    <div class="content-wrapper" style="position: relative;height: auto">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row">
+                    <h4 class="mb-0">Сводка - {{ flat.house }}, кв.{{ flat.number }}</h4>
+                </div>
+            </div><!-- /.container-fluid -->
+            <hr style="border-top: 1px solid darkgrey;">
+
+        </section>
+
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+            <!-- Default box -->
+            <div class="row mb-3">
+                <div class="col-lg-4 col-sm-6 col-12">
+                    <!-- small box -->
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ personal_account_balance }}</h3>
+                            <p>Баланс по квартире</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa-solid fa-money-bill-1"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-4 col-sm-6 col-12">
+                    <!-- small box -->
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ personal_account }}</h3>
+                            <p>Лицевой счет</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa-solid fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- ./col -->
+                <div class="col-lg-4 col-sm-6 col-12">
+                    <!-- small box -->
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ avg_consumption_for_month }}</h3>
+                            <p>Средний расход за месяц</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                    </div>
+                </div>
+                <!-- ./col -->
+            </div>
+            <div class="card card-default card-outline ">
+                <div class="card-header mb-2">
+                    <h3 class="card-title">
+                        Диаграмма расходов
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="row">
+                        <div id="pie-chart1" class="p-0 col-12 col-md-6" style="height: 30rem"></div>
+                        <div id="pie-chart2" class="p-0 col-12 col-md-6" style="height: 30rem"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="card card-default card-outline ">
+                <div class="card-header mb-2">
+                    <h3 class="card-title">
+                        Диаграмма расходов по месяцам за год
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="main" class="p-0" style="height: 30rem"></div>
+
+                </div>
+            </div>
+            <!-- /.card -->
+
+        </section>
+        <!-- /.content -->
+    </div>
+    <!-- /.content-wrapper -->
+
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script type="text/javascript">
+        var chartDom1 = document.getElementById('pie-chart1');
+        var myChart1 = echarts.init(chartDom1);
+        var option1;
+
+        option1 = {
+            title: {
+                text: 'за предыдущий месяц',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c} ({d}%)'
+            },
+            legend: {
+                bottom: 10,
+                left: 'center',
+                data: [
+                    {% for month_consumption in month_consumptions %}
+                        '{{month_consumption.0}}',
+                    {% endfor %}
+                ]
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: '65%',
+                    center: ['50%', '50%'],
+                    selectedMode: 'single',
+                    data: [
+                        {% for month_consumption in month_consumptions %}
+                            {value: {{month_consumption.1}}, name: '{{month_consumption.0}}'},
+                        {% endfor %}
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+
+        option1 && myChart1.setOption(option1);
+
+        var chartDom2 = document.getElementById('pie-chart2');
+        var myChart2 = echarts.init(chartDom2);
+        var option2;
+
+        option2 = {
+            title: {
+                text: 'за текущий год',
+                left: 'center'
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b} : {c} ({d}%)'
+            },
+            legend: {
+                bottom: 10,
+                left: 'center',
+                data: [
+                    {% for year_consumption in year_consumptions %}
+                        '{{year_consumption.0}}',
+                    {% endfor %}
+                ]
+            },
+            series: [
+                {
+                    type: 'pie',
+                    radius: '65%',
+                    center: ['50%', '50%'],
+                    selectedMode: 'single',
+                    data: [
+                        {% for year_consumption in year_consumptions %}
+                            {value: {{year_consumption.1}}, name: '{{year_consumption.0}}'},
+                        {% endfor %}
+                    ],
+                    emphasis: {
+                        itemStyle: {
+                            shadowBlur: 10,
+                            shadowOffsetX: 0,
+                            shadowColor: 'rgba(0, 0, 0, 0.5)'
+                        }
+                    }
+                }
+            ]
+        };
+
+        option2 && myChart2.setOption(option2);
+
+        var chartDom3 = document.getElementById('main');
+        var myChart3 = echarts.init(chartDom3);
+        var option3;
+
+        option3 = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '3%',
+                containLabel: true
+            },
+            xAxis: [
+                {
+                    type: 'category',
+                    data: ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'],
+                    axisTick: {
+                        alignWithLabel: true
+                    }
+                }
+            ],
+            yAxis: [
+                {
+                    type: 'value'
+                }
+            ],
+            series: [
+                {
+                    name: 'Расход',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: [
+                        {% for cons in year_consumptions_by_month %}
+                            {{cons}},
+                        {% endfor %}
+                    ]
+                }
+            ]
+        };
+
+        option3 && myChart3.setOption(option3);
+
+        window.addEventListener('resize', myChart1.resize);
+        window.addEventListener('resize', myChart2.resize);
+        window.addEventListener('resize', myChart3.resize);
+    </script>
+{% endblock %}

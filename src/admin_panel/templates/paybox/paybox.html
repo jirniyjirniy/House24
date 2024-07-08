@@ -1,0 +1,270 @@
+{% extends 'second_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% load check_relation %}
+{% block title_2b %}
+    Касса
+{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet" href="{% static 'plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+{% endblock %}
+{% block name %}
+    Касса
+{% endblock %}
+{% block navigation %}
+    <li class="breadcrumb-item active">Касса</li>
+{% endblock %}
+{% block for_stat %}
+    <div class="row mb-3">
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-success">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ paybox_balance }}</h3>
+                    <p>Состояние кассы</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-info">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ personal_accounts_balance }}</h3>
+                    <p>Баланс по счетам</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-danger">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ personal_accounts_debts }}</h3>
+                    <p>Задолженности по счетам</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block action_list %}
+    <li><a class="dropdown-item" href="{% url 'paybox_create' "plus" %}">Создать приход</a></li>
+    <li><a class="dropdown-item" href="{% url 'paybox_create' "minus" %}">Создать расход</a></li>
+    <li><a class="dropdown-item" href="{{ MEDIA_URL }}/paybox/info.xlsx" download="">Выгрузить в excel</a>
+    </li>
+{% endblock %}
+
+{% block card_body %}
+    <form action="{% url 'paybox_filtered' %}" method="get" id="filter">
+        <table id="paybox" class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+            <tr>
+                <th>№</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Тип платежа</th>
+                <th>Владелец</th>
+                <th>Лицевой счёт</th>
+                <th>Приход/Расход</th>
+                <th>Сумма (грн)</th>
+                <th></th>
+            </tr>
+            <tr class="border-0">
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.number wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.daterange wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+
+                    {% bootstrap_field filter_form.status wrapper_class='' %}
+                </td>
+                <td style="min-width: 200px">
+
+                    {% bootstrap_field filter_form.article wrapper_class='' %}
+                </td>
+                <td style="min-width: 200px">
+
+                    {% bootstrap_field filter_form.flat_owner wrapper_class='' %}
+
+                </td>
+                <td style="min-width: 145px">
+                    {% bootstrap_field filter_form.personal_account wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+
+                    {% bootstrap_field filter_form.debit_credit wrapper_class='' %}
+                </td>
+                <td style="min-width: 120px"></td>
+                <td>
+                </td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in paybox %}
+                <tr class="border-0">
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">{{ row.number }}</td>
+                    <td style="cursor: pointer"
+                        data-href="{% url 'paybox_details' row.id %}">{{ row.date_published|date:"d.m.Y" }}</td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if row.is_complete %}
+                            <span class="badge text-bg-success text-white">Проведен</span>
+                        {% else %}
+                            <span class="badge text-bg-danger text-white">Не проведен</span>
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if  row.article is None %}
+                            (не задано)
+                        {% else %}
+                            {{ row.article }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if  row.flat_owner is None %}
+                            (не задано)
+                        {% else %}
+                            {{ row.flat_owner }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if  row.personal_account is None %}
+                            (не задано)
+                        {% else %}
+                            {{ row.personal_account }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if row.debit_credit == 'plus' %}
+                            <span class="badge text-bg-success text-white">Приход</span>
+                        {% elif row.debit_credit == 'minus' %}
+                            <span class="badge text-bg-danger text-white">Расход</span>
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer" data-href="{% url 'paybox_details' row.id %}">
+                        {% if row.debit_credit == 'plus' %}
+                            <span class="text-success">{{ row.total }}</span>
+                        {% elif row.debit_credit == 'minus' %}
+                            <span class="text-danger">{{ row.total }}</span>
+                        {% endif %}
+                    </td>
+                    <td class="ps-1 pe-1">
+                        <div class="btn-group">
+                            <a class="btn btn-default" href="{% url 'paybox_update' row.id %}" role="button"><i
+                                    class="fa-solid fa-pencil"></i></a>
+                            <button class="btn btn-default delete-confirmation" data-target="{{ row.id }}"
+                                    role="button"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">
+        {% bootstrap_pagination page_obj size='sm' %}
+    </div>
+    <hr style="border-top: 1px solid darkgrey;">
+    <div>
+        <div class="d-flex flex-row flex-wrap"><span>Проведен приход:&nbsp;</span> <span class="text-bold">
+          {% if total_plus %}
+              {{ total_plus }} грн
+          {% else %}
+              0.00 грн
+          {% endif %}
+      </span></div>
+        <div class="d-flex flex-row flex-wrap"><span>Проведен расход:&nbsp;</span> <span class="text-bold">
+           {% if total_minus %}
+               {{ total_minus }} грн
+           {% else %}
+               0.00 грн
+           {% endif %}
+      </span></div>
+    </div>
+{% endblock %}
+
+
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#paybox').DataTable({
+                searching: false,
+                {#ordering:  false,#}
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+
+                    {
+                        "targets": 2, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 6, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 8, // First column
+                        "orderable": false
+                    },
+
+                ]
+
+            });
+        });
+        $(".delete-confirmation").on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/paybox/delete/${$(this).data('target')}`,         /* Куда отправить запрос */
+                    method: 'post',             /* Метод запроса (post или get) */
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+        $('#filter').on('change', function () {
+            $(this).trigger('submit')
+        });
+        $('#filter').on('cancel.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+        $('#filter').on('apply.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+    </script>
+{% endblock %}

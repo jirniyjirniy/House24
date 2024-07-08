@@ -39,6 +39,6 @@ class LoginView(View):
                         return HttpResponseRedirect(url)
 
                 else:
-                    return redirect("tariffs")
+                    return redirect("profile")
         messages.error(request, "Неправильно указана почта или пароль")
         return render(request, self.template_name, context={"form": form})

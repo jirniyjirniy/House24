@@ -1,0 +1,292 @@
+{% extends 'second_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2a %}
+    Квитанции на оплату
+{% endblock %}
+{% block head_2a %}
+    <link rel="stylesheet" href="{% static '/flatpickr/dist/flatpickr.min.css' %}">
+    <link rel="stylesheet" href="{% static 'plugins/icheck-bootstrap/icheck-bootstrap.min.css' %}">
+{% endblock %}
+{% block name %}
+    Квитанции на оплату
+{% endblock %}
+{% block navigation %}
+    <li class="breadcrumb-item active">Квитанции на оплату</li>
+{% endblock %}
+{% block action_list %}
+    <li><a class="dropdown-item" href="{% url 'add_receipt' %}">Создать общую квитанцию</a></li>
+    <li><a class="dropdown-item delete_checked_receipts" href="#">Удалить</a></li>
+{% endblock %}
+{% block for_stat %}
+    <div class="row mb-3">
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-success">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ paybox_balance }}</h3>
+                    <p>Состояние кассы</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-info">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ personal_accounts_balance }}</h3>
+                    <p>Баланс по счетам</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-sm-6 col-12">
+            <!-- small box -->
+            <div class="info-box small-box bg-danger">
+                <div class="info-box-content inner p-0">
+                    <h3 class="info-box-text">{{ personal_accounts_debts }}</h3>
+                    <p>Задолженности по счетам</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block card_body %}
+    <form action="{% url 'filtered_receipts' %}" method="get" id="filter">
+        {% csrf_token %}
+        <table id="receipt" class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+            <tr>
+                <th class="ps-0 pe-0 text-center">
+                    <input type="checkbox" name="selection_all" data-checkbox="true">
+                </th>
+                <th>№ квитанции</th>
+                <th>Статус</th>
+                <th>Дата</th>
+                <th>Месяц</th>
+                <th>Квартира</th>
+                <th>Владелец</th>
+                <th>Проведена</th>
+                <th>Сумма (грн)</th>
+                <th></th>
+            </tr>
+            <tr class="border-0">
+                <td></td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.number wrapper_class='' %}
+                </td>
+                <td style="min-width: 190px">
+                    {% bootstrap_field filter_form.status wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.daterange wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px;position: relative">
+                    {% bootstrap_field filter_form.month wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.flat wrapper_class='' %}
+                </td>
+                <td style="min-width: 200px">
+                    {% bootstrap_field filter_form.flat_owner wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.complete wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px"></td>
+                <td style="min-width: 150px"></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for receipt in receipts %}
+                <tr class="border-0">
+                    <td class="ps-0 pe-0 text-center">
+                        <input type="checkbox" value="{{ receipt.id }}" data-checkbox="true" name="deletion_filter">
+                    </td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'read_receipt' receipt.id %}">{{ receipt.number }}</td>
+                    <td style="cursor: pointer;" data-href="{% url 'read_receipt' receipt.id %}">
+                        {% if receipt.get_status_display == 'Оплачена' %}
+                            <span class="badge text-bg-success text-white">Оплачена</span>
+                        {% elif receipt.get_status_display == 'Частично оплачена' %}
+                            <span class="badge text-bg-warning text-white">Частично оплачена</span>
+                        {% elif receipt.get_status_display == 'Не оплачена' %}
+                            <span class="badge text-bg-danger text-white">Не оплачена</span>
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'read_receipt' receipt.id %}">{{ receipt.date_published }}</td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'read_receipt' receipt.id %}">{{ receipt.date_published|date:"F Y" }}</td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'read_receipt' receipt.id %}">{{ receipt.flat }}, {{ receipt.flat.house }}</td>
+                    <td style="cursor: pointer;" data-href="{% url 'read_receipt' receipt.id %}">
+                        {% if receipt.flat.flat_owner is None %}
+                            (не указано)
+                        {% else %}
+                            {{ receipt.flat.flat_owner }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'read_receipt' receipt.id %}">
+                        {% if receipt.is_complete %}
+                            Проведена
+                        {% else %}
+                            Не проведена
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'read_receipt' receipt.id %}">{{ receipt.total_price }}</td>
+                    <td class="ps-1 pe-1  text-center">
+                        <div class="btn-group">
+                            <a class="btn btn-default" href="{% url 'copy_receipt' receipt.id %}" role="button"><i
+                                    class="fa-solid fa-clone fa-rotate-90"></i></a>
+                            <a class="btn btn-default" href="{% url 'update_receipt' receipt.id %}" role="button"><i
+                                    class="fa-solid fa-pencil"></i></a>
+                            <button class="btn btn-default delete-confirmation" data-target="{{ receipt.id }}"
+                                    role="button"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">
+        {% bootstrap_pagination page_obj size='sm' %}
+    </div>
+    <hr style="border-top: 1px solid darkgrey;">
+    <div>
+        <form action="{% url 'receipts' %}" method="get" class="d-none">
+            {% csrf_token %}
+            <button type="Submit" class="d-none" id="reloader_tool">Refresh</button>
+        </form>
+    </div>
+    </div>
+{% endblock %}
+
+
+{% block  script_2a %}
+    <script type="application/javascript" src="{% static 'flatpickr/dist/flatpickr.js' %}"></script>
+    <script type="application/javascript" src="{% static 'flatpickr/dist/l10n/ru.js' %}"></script>
+    <script type="application/javascript"
+            src="{% static 'flatpickr/dist/plugins/monthSelect/index.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(".month-picker").flatpickr({
+            locale: "ru", // locale for this instance only
+            plugins: [
+                new monthSelectPlugin({
+                    locale: 'ru',
+                    dateFormat: 'm-Y',
+                    shorthand: true,
+                    altFormat: 'F Y',
+                })
+            ]
+        });
+        $(document).ready(function () {
+            $('#receipt').DataTable({
+                searching: false,
+                {#ordering:  false,#}
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+                    {
+                        "targets": 0, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 2, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 7, // First column
+                        "orderable": false
+                    },
+                    {
+                        "targets": 9, // First column
+                        "orderable": false
+                    },
+
+                ]
+
+            });
+        });
+        $(".delete-confirmation").on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/receipts/delete/${$(this).data('target')}`,         /* Куда отправить запрос */
+                    method: 'post',             /* Метод запроса (post или get) */
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+        $('input[name="selection_all"]').on('change', function () {
+            if ($(this).is(':checked')) {
+                $('input[name="deletion_filter"]').attr('checked', true)
+            } else {
+                $('input[name="deletion_filter"]').attr('checked', false)
+            }
+        })
+        $('.delete_checked_receipts').on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить ?')) {
+                $('input[name="deletion_filter"]:checked').each(function () {
+                    $.ajax({
+                        headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                        url: `/admin-panel/receipts/delete/${$(this).val()}`,
+                        method: 'post',             /* Метод запроса (post или get) */
+                        dataType: 'html',
+                        success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                            $('#filter').submit()
+                        }
+                    });
+                })
+            }
+
+        })
+        $('#filter').on('change', function (event) {
+            if ($(event.target).attr('data-checkbox') === 'true') {
+                return false
+            }
+            $(this).trigger('submit')
+        });
+        $('#filter').on('cancel.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+        $('#filter').on('apply.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+
+    </script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Печатная форма документа
+{% endblock %}
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Печатная форма документа</h4>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            {% if user_permission.statistics %}
+                                <li class="breadcrumb-item"><a href="{% url 'statistic' %}">Главная</a></li>
+                            {% else %}
+                                <li class="breadcrumb-item"><a href="{% url 'update_personal' request.user.id %}">Главная</a>
+                                </li>
+                            {% endif %}
+                            <li class="breadcrumb-item"><a href="{% url 'receipts' %}">Квитанции</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'read_receipt' receipt.id %}">Квитанция
+                                №{{ form.instance.number }}</a></li>
+                            <li class="breadcrumb-item">Печатная форма документа</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="card card-success card-outline">
+                <div class="card-header text-right">
+                    <div class="d-flex justify-content-between">
+                        <h5>Список шаблонов</h5>
+                        <a class="btn btn-default" href="{% url 'receipt_print_settings' %}">Настройка шаблонов</a>
+                    </div>
+                </div>
+
+                <!-- /.card-header -->
+                <div class="card-body p-3">
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-7 col-lg-4">
+                            {% for row in rows %}
+                                <div class="form-group">
+                                    <div class="radio">
+                                        <label for="excel_template" class="font-weight-normal">
+                                            <input type="radio" id="excel_template" class="me-2"
+                                                   name="invoice_template_id" value="{{ row.id }}"
+                                                    {% if row.by_default %} checked="checked"{% endif %}>
+                                            {{ row.title }} {% if row.by_default %}
+                                            <span class="font-weight-bold">(по-умолчанию)</span>
+                                        {% endif %} </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+
+                            <input type="hidden" name="invoice_template_type" value="xls">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="text-right d-flex flex-wrap justify-content-end">
+                            <a class="btn btn-default me-1 mb-1 bg-success download" href="#">Скачать</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $('.download').on('click', function () {
+            $.ajax({
+                headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                url: `/admin-panel/receipt/download_excel/${$('input[id="excel_template"]:checked').val()}/{{ receipt.id }}`,
+                {#url: `/admin/receipt/download/${$('input[id="excel_template"]:checked').val()}/{{receipt.id}}`,         /* Куда отправить запрос */#}
+                method: 'post',             /* Метод запроса (post или get) */
+                dataType: 'json',
+                success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                    {#$('.download').after(  $(`<a href="{% get_media_prefix %}/receipt/result/report.xlsx" download="">Hello World</a>`))#}
+                    var link = document.createElement("a");
+                    link.download = name;
+                    link.href = "{% get_media_prefix %}/receipt/result/report.xlsx";
+                    link.click();
+                }
+            });
+        })
+
+    </script>
+{% endblock %}

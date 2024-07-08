@@ -1,0 +1,250 @@
+{% extends 'third_base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title_2b %}
+    Заявки вызова мастера
+{% endblock %}
+{% block head_2b %}
+    <link rel="stylesheet" href="{% static '/plugins/select2/css/select2.css' %}">
+    <link rel="stylesheet" href="{% static 'admin_panel/application/application.css' %}">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
+
+{% endblock %}
+{% block name %}
+    Заявки вызова мастера
+{% endblock %}
+{% block navigation %}
+    <li class="breadcrumb-item active">Заявки вызова мастера</li>
+{% endblock %}
+{% block action_list %}
+    <a class="btn btn-success" href="{% url 'application_add' %}">Добавить заявку</a>
+{% endblock %}
+
+{% block card_body %}
+    <form action="{% url 'applications_filtered' %}" method="get" id="filter">
+        <table id="application" class="table border-0 table-bordered table-hover  linkedRow w-100">
+            <thead>
+            <tr>
+                <th>№ заявки</th>
+                <th>Удобное время</th>
+                <th>Тип мастера</th>
+                <th>Описание</th>
+                <th>Квартира</th>
+                <th>Владелец</th>
+                <th>Телефон</th>
+                <th>Мастер</th>
+                <th>Статус</th>
+                <th></th>
+            </tr>
+            <tr class="border-0">
+                <td style="min-width: 150px">{% bootstrap_field filter_form.number wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.daterange wrapper_class='' %}
+                </td>
+                <td style="min-width: 180px">
+                    {% bootstrap_field filter_form.master_type wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">{% bootstrap_field filter_form.description wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">{% bootstrap_field filter_form.flat wrapper_class='' %}
+                </td>
+                <td style="min-width: 200px">
+                    {% bootstrap_field filter_form.flat_owner wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">{% bootstrap_field filter_form.phone wrapper_class='' %}
+                </td>
+                <td style="min-width: 200px">
+                    {% bootstrap_field filter_form.master wrapper_class='' %}
+                </td>
+                <td style="min-width: 150px">
+                    {% bootstrap_field filter_form.status wrapper_class='' %}
+                </td>
+                <td></td>
+            </tr>
+            </thead>
+            <tbody>
+            {% for application in applications %}
+                <tr class="border-0 row_elem">
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'applications_detail' application.id %}">{{ application.id }}</td>
+                    <td style="cursor: pointer;"
+                        data-href="{% url 'applications_detail' application.id %}">{{ application.date_published|date:"d.m.Y" }}
+                        - {{ application.time_published }}</td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {{ application.get_user_type_display }}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {{ application.description }}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {{ application.flat }}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {% if application.flat.flat_owner is None %}
+                            (не указано)
+                        {% else %}
+                            {{ application.flat.flat_owner }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {% if application.flat.flat_owner is None %}
+                            (не указано)
+                        {% else %}
+                            {{ application.flat.flat_owner.user.phone }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {% if application.user is None %}
+                            (не указано)
+                        {% else %}
+                            {{ application.user }}
+                        {% endif %}
+                    </td>
+                    <td style="cursor: pointer;" data-href="{% url 'applications_detail' application.id %}">
+                        {% if application.get_status_display == 'Новое' %}
+                            <span class="badge text-bg-primary text-white">Новое</span>
+                        {% elif application.get_status_display == 'Выполнено' %}
+                            <span class="badge text-bg-success text-white">Выполнено</span>
+                        {% elif application.get_status_display == 'В работе' %}
+                            <span class="badge text-bg-warning text-white">В работе</span>
+                        {% else %}
+                            {{ application.get_status_display }}
+                        {% endif %}
+                    </td>
+                    <td class="ps-1 pe-1 text-center">
+                        <div class="btn-group">
+                            <a class="btn btn-default" href="{% url 'applications_update' application.id %}"
+                               role="button"><i class="fa-solid fa-pencil"></i></a>
+                            <button class="btn btn-default delete-confirmation" data-target="{{ application.id }}"
+                                    role="button"><i class="fa-solid fa-trash-can"></i></button>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
+{% endblock %}
+
+{% block card_footer %}
+    <div class="d-inline-flex justify-content-end">
+        {% bootstrap_pagination page_obj size='sm' %}
+    </div>
+{% endblock %}
+
+{% block  script_2b %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('#application').DataTable({
+                searching: false,
+                paging: false,
+                select: true,
+                "bInfo": false,
+                orderCellsTop: true,
+                "order": [],
+                "columnDefs": [
+                    {
+                        "targets": 8,
+                        "orderable": false
+                    },
+                    {
+                        "targets": 9,
+                        "orderable": false
+                    },
+                ]
+            });
+        });
+        $(function () {
+            $('input[name="daterange"]').daterangepicker({
+                opens: 'center',
+                autoUpdateInput: false,
+                applyButtonClasses: "btn-success",
+
+                "locale": {
+                    "format": "DD/MM/YYYY",
+                    "separator": " - ",
+                    "applyLabel": "Применить",
+                    "cancelLabel": "Отменить",
+                    "fromLabel": "С",
+                    "toLabel": "По",
+                    "customRangeLabel": "Custom",
+                    "weekLabel": "Нд",
+                    "daysOfWeek": [
+                        "Вс",
+                        "Пн",
+                        "Вт",
+                        "Ср",
+                        "Чт",
+                        "Пт",
+                        "Сб"
+                    ],
+                    "monthNames": [
+                        "Январь",
+                        "Февраль",
+                        "Март",
+                        "Апрель",
+                        "Май",
+                        "Июнь",
+                        "Июль",
+                        "Август",
+                        "Сентябрь",
+                        "Октябрь",
+                        "Ноябрь",
+                        "Декабрь"
+                    ],
+                    "firstDay": 1
+                },
+            },);
+            $('.daterange').on('apply.daterangepicker', function (ev, picker) {
+                $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+            });
+            $('.daterange').on('cancel.daterangepicker', function (ev, picker) {
+                $(this).val('');
+            });
+        });
+        $(".delete-confirmation").on('click', function () {
+
+            if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+                let tr_elem = $(this).parents('.row_elem')
+                $.ajax({
+                    headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                    url: `/admin-panel/applications/delete/${$(this).data('target')}/`,
+                    method: 'post',
+                    dataType: 'html',
+                    context: 'html',
+                    success: function (data) {
+                        tr_elem.remove()
+                    }
+                });
+            }
+        });
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+        $('#filter').on('change', function () {
+            $(this).trigger('submit')
+        });
+        $('#filter').on('cancel.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+        $('#filter').on('apply.daterangepicker', function () {
+            $(this).trigger('submit')
+        });
+    </script>
+    <script type="module" src="{% static 'admin_panel/application/application.js' %}"></script>
+{% endblock %}

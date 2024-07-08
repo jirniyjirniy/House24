@@ -1,0 +1,138 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Просмотр квитанции: #{{ receipt.number }}
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="https://printjs-4de6.kxcdn.com/print.min.css">
+
+{% endblock %}
+
+
+{% block content %}
+    <div class="content-wrapper" style="height: auto">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Просмотр квитанции: #{{ receipt.number }}</h4>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right" style="font-size: 15px">
+                            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Главная</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'receipts_cabinet' %}">Квитанции</a></li>
+                            <li class="breadcrumb-item active">Просмотр квитанции: #{{ receipt.number }}</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <div class="card card-success card-outline">
+                <div class="card-header">
+                    <div class="d-flex justify-content-end flex-wrap">
+                        <a href="{% url 'receipt_to_pdf2' receipt.id %}" class="btn btn-info btn-sm print_pdf">
+                            <i class="fa fa-print" aria-hidden="true"></i> <span class="hidden-xs">Распечатать</span>
+                        </a>
+                    </div>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body p-3">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                            <tr>
+                                <th style="min-width: 40px;">#</th>
+                                <th style="min-width: 200px;">Услуга</th>
+                                <th style="min-width: 150px;">Количество потребления (расход)</th>
+                                <th style="min-width: 130px;">Ед. изм.</th>
+                                <th style="min-width: 150px;">Цена за ед., грн</th>
+                                <th style="min-width: 150px;">Стоимость, грн</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <td colspan="5"></td>
+                                <td colspan="2"><b>Итого: <span id="price-total">???</span></b></td>
+                            </tr>
+                            </tfoot>
+                            <tbody id="form-receiptservice-rows">
+                            {% for receipt_service in receipt_services %}
+                                <tr role="row">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ receipt_service.service.title }}</td>
+                                    <td class="consumption" data-consumption="{{ receipt_service.consumption }}"></td>
+                                    <td>{{ receipt_service.measure.title }}</td>
+                                    <td class="unit_price" data-unit_price="{{ receipt_service.unit_price }}"></td>
+                                    <td class="total_service_price"></td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer ">
+                    <hr style="border-top: 1px solid darkgrey;">
+                    <div class="text-right">
+                        <a href="{% url 'receipt_to_pdf2' receipt.id %}" class="btn btn-sm btn-warning" download=""><i
+                                class="fa fa-file-pdf-o" aria-hidden="true"></i> Скачать в PDF</a>
+                        <a href="/404" class="btn btn-sm btn-success"><i class="fa fa-credit-card"
+                                                                         aria-hidden="true"></i> Оплатить</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /.content -->
+    </div>
+
+{% endblock %}
+
+{% block  script %}
+    <script src="https://printjs-4de6.kxcdn.com/print.min.js"></script>
+    <script>
+        $('.print_pdf').on('click', function (event) {
+            $.ajax({
+                url: `/cabinet/receipt_to_pdf_print/{{ receipt.id }}`,         /* Куда отправить запрос */
+                method: 'get',             /* Метод запроса (post или get) */
+                dataType: 'html',
+                context: 'html',
+                success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                    printJS('media/invoice/invoice.pdf')
+                }
+            });
+            return false;
+        })
+        let total_price = 0
+        $('#form-receiptservice-rows').children().each(function () {
+            let unit_price = $(this).find('.unit_price')
+            let consumption = $(this).find('.consumption')
+
+            consumption.data('consumption', consumption.data('consumption').replace(/,/g, "."));
+            unit_price.data('unit_price', unit_price.data('unit_price').replace(/,/g, "."));
+            consumption.text(consumption.data('consumption'))
+            unit_price.text(unit_price.data('unit_price'))
+            let total_service_price = $(this).find('.total_service_price')
+            if (Number(unit_price.text()) && Number(consumption.text())) {
+                $(total_service_price).text(Number(Number(unit_price.text()).toFixed(2) * Number(consumption.text()).toFixed(2)).toFixed(2))
+                total_price = total_price + Number($(total_service_price).text())
+                $('#price-total').text(Number(total_price).toFixed(2))
+            }
+        })
+
+    </script>
+{% endblock %}

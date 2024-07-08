@@ -1,0 +1,410 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library #}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript #}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts #}
+{% bootstrap_messages %}
+{# Read the documentation for more information #}
+{% block title %}
+    Статистика
+{% endblock %}
+{% block head %}
+{% endblock %}
+{% block content %}
+
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row">
+                <h4 class="mb-0">Статистика</h4>
+            </div>
+        </div><!-- /.container-fluid -->
+        <hr style="border-top: 1px solid darkgrey;">
+
+    </section>
+
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            <div class="row">
+                <h5 class="mb-4">В вашем обслуживании</h5>
+            </div>
+        </div><!-- /.container-fluid -->
+        <!-- Default box -->
+        <div class="row mb-3">
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ houses_count }}</h3>
+                        <p>Домов</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-building"></i>
+                    </div>
+                    <a href="{% url 'houses' %}" class="small-box-footer">Перейти в дома<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ flat_owner_count }}</h3>
+                        <p>Активных владельцев</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-users "></i>
+                    </div>
+                    <a href="{% url 'clients' %}" class="small-box-footer">Перейти к владельцам<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ in_work_applications_count }}</h3>
+                        <p>Заявок мастера в работе</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-screwdriver-wrench "></i>
+                    </div>
+                    <a href="{% url 'applications' %}" class="small-box-footer">Перейти в заявки<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <!-- ./col -->
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ flats_count }}</h3>
+
+                        <p>Квартир</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <a href="{% url 'flats' %}" class="small-box-footer">Перейти в квартиры<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ personal_accounts_count }}</h3>
+                        <p>Лицевых счетов</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-child-reaching"></i>
+                    </div>
+                    <a href="{% url 'personal_accounts' %}" class="small-box-footer">Перейти к счетам<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+            <div class="col-lg-4 col-sm-6 col-12">
+                <!-- small box -->
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ new_applications_count }}</h3>
+                        <p>Новых заявок мастера</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <a href="{% url 'applications' %}" class="small-box-footer">Перейти в заявки<i
+                            class="ms-2 fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <!-- ./col -->
+        </div>
+        <div class="row ps-2">
+            <div class="card card-default card-outline col-12 col-sm-6 col-md-7 col-lg-7  col-xl-8  ">
+                <div class="card-header mb-2">
+                    <h3 class="card-title">
+                        График погашения квитанций, грн
+                    </h3>
+                </div>
+                <div class="card-body p-0">
+                    <div id="bills" class="p-0" style=";height: 20rem"></div>
+                </div>
+            </div>
+            <div class="col-12 col-sm-6  col-md-5  col-lg-5 col-xl-4 ps-3">
+                <div class="info-box mb-3 bg-danger">
+                    <span class="info-box-icon"><i class="fa-solid fa-money-bill-1 fa-lg"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">ЗАДОЛЖЕННОСТЬ ПО СЧЕТАМ, ГРН</span>
+                        <span class="info-box-number">{{ personal_accounts_debts }}</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+                <div class="info-box mb-3 bg-info">
+                    <span class="info-box-icon"><i class="fa-solid fa-money-bill-1 fa-lg"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">БАЛАНС ПО СЧЕТАМ, ГРН</span>
+                        <span class="info-box-number">{{ personal_accounts_balance }}</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+                <div class="info-box mb-3 bg-success">
+                    <span class="info-box-icon"><i class="fa-solid fa-money-bill-1 fa-lg"></i></span>
+
+                    <div class="info-box-content">
+                        <span class="info-box-text">СОСТОЯНИЕ КАССЫ, ГРН</span>
+                        <span class="info-box-number">{{ paybox_balance }}</span>
+                    </div>
+                    <!-- /.info-box-content -->
+                </div>
+                <!-- /.info-box -->
+            </div>
+        </div>
+        <div class="card card-default card-outline ">
+            <div class="card-header mb-2">
+                <h3 class="card-title">
+                    График приходов и расходов по кассе, грн
+                </h3>
+            </div>
+            <div class="card-body p-0">
+                <div id="paybox" class="p-0" style=";height: 20rem"></div>
+            </div>
+        </div>
+
+
+        <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+    <!-- /.content-wrapper -->
+
+{% endblock %}
+{% block script %}
+    <script type="text/javascript" src="https://fastly.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script type="text/javascript">
+        var dom = document.getElementById('bills');
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+        var app = {};
+
+        var option;
+
+        option = {
+            legend: {
+                top: "top",
+
+            },
+            tooltip: {},
+            dataset: {
+                dimensions: ['product', "задолженность", 'Погашение задолженности',],
+                source: [
+                    {
+                        product: 'январь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.0 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.0 }}',
+                    },
+                    {
+                        product: 'февраль 2023',
+                        "задолженность": '{{ receipt_minus_by_month.1 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.1 }}',
+                    },
+                    {
+                        product: 'март 2023',
+                        "задолженность": '{{ receipt_minus_by_month.2 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.2 }}',
+                    },
+                    {
+                        product: 'апрель 2023',
+                        "задолженность": '{{ receipt_minus_by_month.3 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.3 }}',
+                    },
+                    {
+                        product: 'май 2023',
+                        "задолженность": '{{ receipt_minus_by_month.4 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.4 }}',
+                    },
+                    {
+                        product: 'июнь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.5 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.5 }}',
+                    },
+                    {
+                        product: 'июль 2023',
+                        "задолженность": '{{ receipt_minus_by_month.6 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.6 }}',
+                    },
+                    {
+                        product: 'август 2023',
+                        "задолженность": '{{ receipt_minus_by_month.7 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.7 }}',
+                    },
+                    {
+                        product: 'сентябрь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.8 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.8 }}',
+                    },
+                    {
+                        product: 'октябрь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.9 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.9 }}',
+                    },
+                    {
+                        product: 'ноябрь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.10 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.10 }}',
+                    },
+                    {
+                        product: 'декабрь 2023',
+                        "задолженность": '{{ receipt_minus_by_month.11 }}',
+                        'Погашение задолженности': '{{ receipt_plus_by_month.11 }}',
+                    },
+                ]
+            },
+            xAxis: {
+                type: 'category',
+                axisLabel: {interval: 0, rotate: 30}
+
+            },
+            yAxis: {},
+            // Declare several bar series, each will be mapped
+            // to a column of dataset.source by default.
+            series: [
+                {
+                    type: 'bar',
+                    color: 'rgb(221, 75, 57)'
+                },
+                {
+                    type: 'bar',
+                    color: 'rgb(0, 166, 90)'
+
+                }
+            ]
+        };
+
+        if (option && typeof option === 'object') {
+            myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+
+
+        var dom = document.getElementById('paybox');
+        var myChart = echarts.init(dom, null, {
+            renderer: 'canvas',
+            useDirtyRect: false
+        });
+        var app = {};
+
+        var option;
+
+        option = {
+            legend: {
+                top: "top",
+            },
+            tooltip: {},
+            dataset: {
+                dimensions: ['product', "приход", 'расход',],
+                source: [
+                    {
+                        product: 'январь 2023',
+                        "приход": {{ paybox_plus_by_month.0 }},
+                        'расход': '{{ paybox_minus_by_month.0 }}',
+                    },
+                    {
+                        product: 'февраль 2023',
+                        "приход": {{ paybox_plus_by_month.1 }},
+                        'расход': '{{ paybox_minus_by_month.1 }}',
+                    },
+                    {
+                        product: 'март 2023',
+                        "приход": {{ paybox_plus_by_month.2 }},
+                        'расход': '{{ paybox_minus_by_month.2 }}',
+                    },
+                    {
+                        product: 'апрель 2023',
+                        "приход": {{ paybox_plus_by_month.3 }},
+                        'расход': '{{ paybox_minus_by_month.3 }}',
+                    },
+                    {
+                        product: 'май 2023',
+                        "приход": {{ paybox_plus_by_month.4 }},
+                        'расход': '{{ paybox_minus_by_month.4 }}',
+                    },
+                    {
+                        product: 'июнь 2023',
+                        "приход": {{ paybox_plus_by_month.5 }},
+                        'расход': '{{ paybox_minus_by_month.5 }}',
+                    },
+                    {
+                        product: 'июль 2023',
+                        "приход": {{ paybox_plus_by_month.6 }},
+                        'расход': '{{ paybox_minus_by_month.6 }}',
+                    },
+                    {
+                        product: 'август 2023',
+                        "приход": {{ paybox_plus_by_month.7 }},
+                        'расход': '{{ paybox_minus_by_month.7 }}',
+                    },
+                    {
+                        product: 'сентябрь 2023',
+                        "приход": {{ paybox_plus_by_month.8 }},
+                        'расход': '{{ paybox_minus_by_month.8 }}',
+                    },
+                    {
+                        product: 'октябрь 2023',
+                        "приход": {{ paybox_plus_by_month.9 }},
+                        'расход': '{{ paybox_minus_by_month.9 }}',
+                    },
+                    {
+                        product: 'ноябрь 2023',
+                        "приход": {{ paybox_plus_by_month.10 }},
+                        'расход': '{{ paybox_minus_by_month.10 }}',
+                    },
+                    {
+                        product: 'декабрь 2023',
+                        "приход": {{ paybox_plus_by_month.11 }},
+                        'расход': '{{ paybox_minus_by_month.11 }}',
+                    },
+                ]
+            },
+            xAxis: {
+                type: 'category',
+            },
+            yAxis: {},
+            // Declare several bar series, each will be mapped
+            // to a column of dataset.source by default.
+            series: [
+                {
+                    type: 'bar',
+                    color: 'rgb(0, 166, 90)'
+                },
+                {
+                    type: 'bar',
+                    color: 'rgb(221, 75, 57)'
+
+
+                }
+            ]
+        };
+
+        if (option && typeof option === 'object') {
+            myChart.setOption(option);
+        }
+
+        window.addEventListener('resize', myChart.resize);
+    </script>
+{% endblock %}

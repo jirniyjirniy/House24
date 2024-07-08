@@ -1,0 +1,221 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Сообщения
+{% endblock %}
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+    <div class="content-wrapper" style="height: auto">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Сообщения</h4>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Главная</a></li>
+                            <li class="breadcrumb-item active">Сообщения</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+                <div class="row mb-3">
+                    <div class="dropdown text-right">
+                    </div>
+                    <!-- ./col -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </section>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Default box -->
+            <form action="{% url 'filtered_messages_cabinet' %}" method="get" id="filter">
+                <div class="card card-success card-outline">
+                    <div class="card-header">
+                        <div class="card-tools">
+                            <div class="input-group input-group-sm">
+                                {% if filter_form.search_row.value %}
+                                    <input type="text" class="form-control" placeholder="Поиск" name="search_row"
+                                           value="{{ filter_form.search_row.value }}" id="id_search_row"
+                                           maxlength="100">
+                                {% else %}
+                                    <input type="text" class="form-control" placeholder="Поиск" name="search_row"
+                                           id="id_search_row" maxlength="100">
+                                {% endif %}
+                                <div class="input-group-append">
+                                    <div class="btn btn-success pt-2 search-button">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- /.card-tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body p-0">
+                        <div class="mailbox-controls">
+                            <!-- Check all button -->
+                            <button type="button" class="btn btn-default btn-sm checkbox-toggle">
+                                <i class="far fa-square"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm delete_checked_messages">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </div>
+                            <!-- /.btn-group -->
+                        </div>
+                        <div class="table-responsive mailbox-messages">
+                            <table class="table table-hover table-striped">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                    <td class="mailbox-name">
+                                        <b>Получатели</b>
+                                    </td>
+                                    <td class="mailbox-subject">
+                                        <b>Текст</b>
+                                    </td>
+                                    <td class="mailbox-date">
+                                        <b>Дата</b>
+                                    </td>
+                                </tr>
+                                {% for mailbox in mailboxes %}
+                                    <tr style="cursor: pointer">
+                                        <td>
+                                            <div class="icheck-primary">
+                                                <input type="checkbox" value="{{ mailbox.id }}" name="deletion_filter">
+                                                <label for="check2"></label>
+                                            </div>
+                                        </td>
+                                        <td style="cursor: pointer"
+                                            data-href="{% url 'mailbox_detail_cabinet' mailbox.id %}"
+                                            class="mailbox-name">
+                                            {% if mailbox.house is None %}
+                                                Всем
+                                            {% else %}
+                                                {{ mailbox.house }}
+                                                {% if mailbox.section is None %}
+                                                {% else %}
+                                                    , {{ mailbox.section }}
+                                                {% endif %}
+                                                {% if mailbox.floor is None %}
+                                                {% else %}
+                                                    , {{ mailbox.floor }}
+                                                {% endif %}
+                                                {% if mailbox.flat is None %}
+                                                {% else %}
+                                                    , кв.{{ mailbox.flat }}
+                                                {% endif %}
+                                            {% endif %}
+                                        </td>
+                                        <td style="cursor: pointer"
+                                            data-href="{% url 'mailbox_detail_cabinet' mailbox.id %}"
+                                            class="mailbox-subject">
+                                            <b>{{ mailbox.title }}</b>
+                                            - {{ mailbox.description }}
+                                        </td>
+                                        <td style="cursor: pointer"
+                                            data-href="{% url 'mailbox_detail_cabinet' mailbox.id %}"
+                                            class="mailbox-date">
+                                            {{ mailbox.date_published|date:"d.m.Y" }}-{{ mailbox.date_published|time:"h:i" }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                            <!-- /.table -->
+                        </div>
+                        <!-- /.mail-box-messages -->
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer p-0">
+                        <div class="mailbox-controls">
+                            <!-- Check all button -->
+                            <button type="button" class="btn btn-default btn-sm checkbox-toggle">
+                                <i class="far fa-square"></i>
+                            </button>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default btn-sm delete_checked_messages">
+                                    <i class="far fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <form action="{% url 'mailboxes_cabinet' %}" method="get" class="d-none">
+                            {% csrf_token %}
+                            <button type="Submit" class="d-none" id="reloader_tool">Refresh</button>
+                        </form>
+                    </div>
+                </div>
+            </form>
+        </section>
+        <!-- /.content -->
+    </div>
+
+{% endblock %}
+
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js"></script>
+    <script type="application/javascript"
+            src="{% static 'flatpickr/dist/plugins/monthSelect/index.js' %}"></script>
+    <script type="application/javascript">
+        $('.checkbox-toggle').click(function () {
+            var clicks = $(this).data('clicks')
+            if (clicks) {
+                //Uncheck all checkboxes
+                $('.mailbox-messages input[type=\'checkbox\']').prop('checked', false)
+                $('.checkbox-toggle .far.fa-check-square').removeClass('fa-check-square').addClass('fa-square')
+            } else {
+                //Check all checkboxes
+                $('.mailbox-messages input[type=\'checkbox\']').prop('checked', true)
+                $('.checkbox-toggle .far.fa-square').removeClass('fa-square').addClass('fa-check-square')
+            }
+            $(this).data('clicks', !clicks)
+        })
+        document.addEventListener("DOMContentLoaded", function (event) {
+            const rows = document.querySelectorAll("td[data-href]");
+            rows.forEach(row => {
+                row.addEventListener("click", () => {
+                    window.location.href = row.dataset.href;
+                });
+            });
+        });
+        $('.delete_checked_messages').on('click', function () {
+            if (confirm('Вы уверены, что хотите удалить ?')) {
+                $('input[name="deletion_filter"]:checked').each(function () {
+                    $.ajax({
+                        headers: {"X-CSRFToken": $.cookie("csrftoken")},
+                        url: `/cabinet/mailbox/delete/${$(this).val()}`,
+                        method: 'post',             /* Метод запроса (post или get) */
+                        dataType: 'html',
+                        success: function (data) {   /* функция которая будет выполнена после успешного запроса.  */
+                            $('#reloader_tool').click()
+
+                        }
+                    });
+                })
+            }
+
+        })
+        $('.search-button').on('click', function () {
+
+            $("#filter").trigger('submit')
+
+        });
+    </script>
+{% endblock %}

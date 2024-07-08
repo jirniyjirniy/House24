@@ -1,0 +1,198 @@
+{% extends 'cabinet/base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Новая заявка
+{% endblock %}
+{% block head %}
+    <link rel="stylesheet" href="{% static '/dist/flatpickr.min.css' %}">
+    <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static '/plugins/select2/css/select2.css' %}">
+{% endblock %}
+{% block content %}
+    <div class="content-wrapper" style="height: auto">
+        <!-- Content Header (Page header) -->
+        <section class="content-header pb-0">
+            <div class="container-fluid">
+                <div class="row mb-2">
+                    <div class="col-sm-6">
+                        <h4 class="mb-0">Новая заявка</h4>
+                    </div>
+                    <div class="col-sm-6">
+                        <ol class="breadcrumb float-sm-right">
+                            <li class="breadcrumb-item"><a href="{% url 'profile' %}">Главная</a></li>
+                            <li class="breadcrumb-item"><a href="{% url 'applications_cabinet' %}">Вызов мастера </a>
+                            </li>
+                            <li class="breadcrumb-item">Новая заявка</li>
+                        </ol>
+                    </div>
+                </div>
+                <hr style="border-top: 1px solid darkgrey;">
+            </div><!-- /.container-fluid -->
+        </section>
+        <!-- Main content -->
+        <section class="content">
+            <form method="post" id="application-form" action="{% url 'add_application_cabinet' %}"
+                  enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <!-- Default box -->
+                <div class="card card-primary card-outline card-success ps-3">
+                    <div class="card-header p-0 border-bottom-0">
+                    </div>
+                    <div class="card-body p-2">
+                        <div class="row">
+                            {% bootstrap_field form.user_type %}
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.flat %}
+                        </div>
+                        <div class="row ps-1 pe-1">
+                            <div class="col-12 col-sm-6 mb-3">
+                                <div class="d-flex">
+                                    {% bootstrap_field form.date_published wrapper_class='flex-grow-1' %}
+                                    <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                         style="height: 38px;border: 1px solid #ced4da">
+                                        <i class="fa-solid fa-calendar-days"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 mb-3">
+                                <div class="d-flex">
+                                    {% bootstrap_field form.time_published wrapper_class='flex-grow-1' %}
+                                    <div class="d-inline-flex align-items-center  ps-3 pe-3 pt-2 pb-2 bg-white"
+                                         style="height: 38px;border: 1px solid #ced4da">
+                                        <i class="fa-regular fa-clock fa-flip-horizontal"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            {% bootstrap_field form.description %}
+                        </div>
+
+
+                        <div class="col-12 text-right">
+                            {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                            {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+        </section>
+        <!-- /.content -->
+    </div>
+{% endblock %}
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="{% static 'plugins/select2/js/select2.full.min.js' %}"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/lang/summernote-ru-RU.min.js"
+            integrity="sha512-uCNUSqDrnthkeMqbxKoePE2CewCjUenOwh3/Fw8shLJ+bBppg6ynadVRVcL5EStFBq2GUKUrAJZgC2qs/Q5z9Q=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script type="application/javascript" src="{% static 'flatpickr/dist/flatpickr.js' %}"></script>
+    <script type="application/javascript" src="{% static 'flatpickr/dist/l10n/ru.js' %}"></script>
+
+    <script type="application/javascript">
+        $('.select2').select2({
+            placeholder: 'Выберите...',
+            allowClear: true,
+        })
+        $('.summernote').summernote({
+            height: 200,
+            lang: 'ru-RU'
+
+        });
+        $(".publishing-date").flatpickr({
+            dateFormat: "d.m.Y",
+            locale: "ru", // locale for this instance only
+        });
+        $(".publishing-time").flatpickr({
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            locale: "ru", // locale for this instance only
+        });
+        $('.publishing-date').addClass('bg-white')
+        $(".publishing-time").addClass('bg-white')
+        $("#application-form").validate({
+
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: [],
+            rules: {
+                'description': {
+                    required: true
+                },
+                'date_published': {
+                    required: true
+                },
+                'time_published': {
+                    required: true
+                },
+                'flat': {
+                    required: true
+                }
+            },
+            messages: {
+                'description': {
+                    required: "Обязательно укажите описание"
+                },
+                'date_published': {
+                    required: "Обязательно укажите дату"
+                },
+                'time_published': {
+                    required: "Обязательно укажите время"
+                },
+                'flat': {
+                    required: "Обязательно укажите квартиру"
+                },
+            },
+            highlight: function (element, errorClass, validClass) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    $("#select2-" + elem.attr("id") + "-container").parent().addClass(errorClass);
+                } else {
+                    elem.addClass(errorClass);
+                }
+            },
+            unhighlight: function (element, errorClass, validClass) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    $("#select2-" + elem.attr("id") + "-container").parent().removeClass(errorClass);
+                } else {
+                    elem.removeClass(errorClass);
+                }
+            },
+            errorPlacement: function (error, element) {
+                var elem = $(element);
+                if (elem.hasClass("select2-hidden-accessible")) {
+                    element = $("#select2-" + elem.attr("id") + "-container").parent();
+                    error.insertAfter(element);
+                } else {
+                    error.insertAfter(element);
+                }
+            }
+        });
+        $('.select2').select2({
+            placeholder: 'Выберите...',
+            allowClear: true,
+        }).on("change", function (e) {
+            $(this).valid()
+        });
+    </script>
+    <script type="module" src="{% static 'admin_panel/application/application.js' %}"></script>
+{% endblock %}

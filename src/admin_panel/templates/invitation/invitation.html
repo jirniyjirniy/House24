@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% load static %}
+{# Load the tag library#}
+{% load django_bootstrap5 %}
+{# Load CSS and JavaScript#}
+{% bootstrap_css %}
+{% bootstrap_javascript %}
+{# Display django.contrib.messages as Bootstrap alerts#}
+{% bootstrap_messages %}
+{# Read the documentation for more information#}
+{% block title %}
+    Отправить приглашение
+{% endblock %}
+{% block head %}
+{% endblock %}
+
+
+{% block content %}
+    <!-- Content Header (Page header) -->
+    <section class="content-header pb-0">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h4 class="mb-0">Отправить приглашение</h4>
+                </div>
+            </div>
+            <hr style="border-top: 1px solid darkgrey;">
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <!-- Default box -->
+        <div class="card card-primary card-outline card-success ps-3">
+            <div class="card-header p-0 border-bottom-0">
+            </div>
+            <div class="card-body">
+                <form method="post" id="form-invite" action="{% url 'send_invitation' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-12 col-lg-7 text-left">
+                            {% bootstrap_form form layout='vertical' %}
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-7 text-right">
+                        {% bootstrap_button "Отменить" button_type="reset" button_class="btn-default" %}
+                        {% bootstrap_button "Сохранить" button_type="submit" button_class="btn-success" %}
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </section>
+    <!-- /.content -->
+{% endblock %}
+
+{% block  script %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"
+            integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA=="
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $.validator.addMethod("phoneUA", function (phone_number, element) {
+            {#phone_number = phone_number.replace(/\s+/g, "");#}
+            return this.optional(element) || phone_number.length === 19 &&
+                phone_number.match(/^\+38 \(\d{3}\) \d{3}-?\d{2}-?\d{2}$/);
+        }, "Пример ввода: +38 (068) 512-23-16");
+        $("#form-invite").validate({
+            errorClass: "error fail-alert",
+            validClass: "valid success-alert",
+            ignore: '.ignore',
+            rules: {
+                email: {
+                    required: true,
+                    email: true
+                },
+                phone: {
+                    required: true,
+                    phoneUA: true,
+                },
+
+            },
+            messages: {
+                email: {
+                    required: "Обязательно укажите email",
+                    email: "Проверьте правильность email",
+                },
+                phone: {
+                    required: "Обязательно укажите телефон",
+                },
+
+            }
+
+        });
+        $('#form-invite').on("change", function (e) {
+            $(this).valid()
+        });
+    </script>
+
+{% endblock %}

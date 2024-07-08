@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+{% load static %}
+<head>
+    <meta charset="utf-8">
+    <title>Invoice</title>
+    <meta name="description" content="Invoice demo sample">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Lato:300,400,700);
+
+        body {
+            color: black;
+            font-family: 'Lato', Arial, sans-serif;
+            font-size: 10px;
+
+        }
+
+
+        table {
+            width: 100%;
+            margin: auto;
+        }
+
+        table, th, td {
+            border: 1px solid black;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 10px;
+        }
+    </style>
+</head>
+
+<body>
+<table>
+    <thead>
+    <tr>
+        <th rowspan="2" colspan="1">Отримувач/Виконувач</th>
+        <th rowspan="4" colspan="6">
+            <img src="http://myhouse24.avada-media.ua/logo.svg" style="width: 150px;height: 40px;margin-left: 80px"
+                 alt="">
+        </th>
+        <th rowspan="1" colspan="1">№ О/рахунку</th>
+        <th rowspan="1" colspan="2">ПОВIДОМЛЕННЯ</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">
+            {% if receipt.flat.personal_account %}
+                {{ receipt.flat.personal_account }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1">№</th>
+        <th rowspan="1" colspan="1">{{ receipt.number }}</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1">от</th>
+        <th rowspan="1" colspan="1">{{ receipt.start_date }}</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Платник</th>
+        <th rowspan="1" colspan="6">
+            {% if receipt.flat.flat_owner %}
+                {{ receipt.flat.flat_owner }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Нараховано</th>
+        <th rowspan="1" colspan="1">{{ receipt.total_price }}</th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Баланс О/р</th>
+        <th rowspan="1" colspan="1">
+            {% if receipt.flat.personal_account %}
+                {{ receipt.flat.personal_account.balance }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1">на</th>
+        <th rowspan="1" colspan="2">{{ receipt.date_published }}</th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">ДО СПЛАТИ</th>
+        <th rowspan="1" colspan="1">{{ receipt.total_price }}</th>
+        <th rowspan="1" colspan="1">за</th>
+        <th rowspan="1" colspan="2">{{ receipt.data_published|date:"F Y" }}</th>
+        <th rowspan="2" colspan="3" style="text-align: center">
+            <p>С условиями приема банком&nbsp;</p>
+            <p>суммы ознакомлен и согласен</p>
+            <p>________________</p>
+            <p>(пiдпис платника)</p>
+        </th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+
+    </tr>
+    <tr>
+    </tr>
+    <tr>
+        <th rowspan="2" colspan="1">Отримувач/Виконувач</th>
+        <th rowspan="4" colspan="6">
+            <img src="http://myhouse24.avada-media.ua/logo.svg" style="width: 150px;height: 40px;margin-left: 80px"
+                 alt="">
+        </th>
+        <th rowspan="1" colspan="1">№ О/рахунку</th>
+        <th rowspan="1" colspan="2">КВИТАНЦIЯ</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">
+            {% if receipt.flat.personal_account %}
+                {{ receipt.flat.personal_account.number }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1">№</th>
+        <th rowspan="1" colspan="1">{{ receipt.number }}</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1">от</th>
+        <th rowspan="1" colspan="1">{{ receipt.start_date }}</th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Платник</th>
+        <th rowspan="1" colspan="6">
+            {% if receipt.flat.flat_owner %}
+                {{ receipt.flat.flat_owner }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Нараховано</th>
+        <th rowspan="1" colspan="1">{{ receipt.total_price }}</th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">Баланс О/р</th>
+        <th rowspan="1" colspan="1">
+            {% if receipt.flat.personal_account %}
+                {{ receipt.flat.personal_account.balance }}
+            {% else %}
+                не указано
+            {% endif %}
+        </th>
+        <th rowspan="1" colspan="1">на</th>
+        <th rowspan="1" colspan="2">{{ receipt.date_published }}</th>
+        <th rowspan="1" colspan="2"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="1">ДО СПЛАТИ</th>
+        <th rowspan="1" colspan="1">{{ receipt.total_price }}</th>
+        <th rowspan="1" colspan="1">за</th>
+        <th rowspan="1" colspan="2">{{ receipt.data_published|date:"F Y" }}</th>
+        <th rowspan="1" colspan="2"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+        <th rowspan="1" colspan="1"></th>
+    </tr>
+    <tr>
+        <th rowspan="1" colspan="2">Услуга</th>
+        <th rowspan="1" colspan="2">Тариф</th>
+        <th rowspan="1" colspan="2">Ед.изм</th>
+        <th rowspan="1" colspan="2">Расход</th>
+        <th rowspan="1" colspan="2">Сумма, грн</th>
+    </tr>
+    {% for service in services %}
+        <tr>
+            <th rowspan="1" colspan="2">{{ service.service.title }}</th>
+            <th rowspan="1" colspan="2">{{ receipt.tariff }}</th>
+            <th rowspan="1" colspan="2">{{ service.measure.title }}</th>
+            <th rowspan="1" colspan="2">{{ service.calc_sum }}</th>
+            <th rowspan="1" colspan="2"></th>
+        </tr>
+    {% endfor %}
+
+
+    <tr>
+        <th rowspan="1" colspan="2"></th>
+        <th rowspan="1" colspan="2"></th>
+        <th rowspan="1" colspan="2"></th>
+        <th rowspan="1" colspan="2">РАЗОМ:</th>
+        <th rowspan="1" colspan="2">{{ receipt.total_price }}</th>
+    </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+</body>
+</html>

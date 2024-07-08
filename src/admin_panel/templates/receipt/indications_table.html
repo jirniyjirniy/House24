@@ -1,0 +1,36 @@
+{% load static %}
+
+{% for indication in indications %}
+    <tr>
+        <td>{{ indication.number }}</td>
+        <td>
+              {% if indication.get_status_display == 'Новое' %}
+                  <span class="badge text-bg-warning text-white">Новое</span>
+                  {% elif indication.get_status_display == 'Учтено' %}
+                  <span class="badge text-bg-success text-white">Учтено</span>
+                  {% elif indication.get_status_display == 'Учтено и оплачено' %}
+                  <span class="badge text-bg-success text-white">Учтено и оплачено</span>
+                  {% else %}
+                  <span class="badge text-bg-primary text-white">Нулевое</span>
+              {% endif %}
+        </td>
+        <td>{{ indication.date_published }}</td>
+        <td>{{ indication.date_published|date:'F Y' }}</td>
+        <td>{{ indication.flat.house}}</td>
+        <td>
+            {% if indication.flat.section is None %}
+                (не задано)
+            {% else %}
+                {{ indication.flat.section}}
+            {% endif %}
+        </td>
+        <td>{{ indication.flat.number}}</td>
+        <td>{{ indication.service.title}}</td>
+        <td style="background: #F0FBF0">
+            {{ indication.indication_val }}
+        </td>
+        <td style="background: #F0FBF0">
+            {{ indication.service.measure }}
+        </td>
+    </tr>
+{% endfor %}
